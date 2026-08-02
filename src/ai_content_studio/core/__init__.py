@@ -8,7 +8,19 @@ from ai_content_studio.core.exceptions import (
     PipelineError,
 )
 from ai_content_studio.core.logging import get_logger
-from ai_content_studio.core.paths import BRANDS, DOCS, ROOT, SRC
+from ai_content_studio.core.paths import (
+    ASSETS,
+    BRANDS,
+    CACHE,
+    DATA,
+    DOCS,
+    OUTPUT,
+    PROJECTS,
+    RENDERS,
+    ROOT,
+    SRC,
+    TEMP,
+)
 from ai_content_studio.core.settings import Settings
 
 __all__ = [
@@ -21,6 +33,13 @@ __all__ = [
     "PipelineError",
     "ROOT",
     "SRC",
-    "BRANDS",
     "DOCS",
+    "BRANDS",
+    "DATA",
+    "CACHE",
+    "ASSETS",
+    "PROJECTS",
+    "RENDERS",
+    "OUTPUT",
+    "TEMP",
 ]
