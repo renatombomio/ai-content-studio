@@ -2,7 +2,8 @@
   "permissions": {
     "allow": [
       "Bash(git *)",
-      "Bash(uv run *)"
+      "Bash(uv run *)",
+      "Bash(uv add *)"
     ]
   }
 }

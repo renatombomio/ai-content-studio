@@ -35,3 +35,7 @@ class SchedulerError(AppError):
 
 class PipelineError(AppError):
     """Raised when a pipeline stage fails and execution cannot continue."""
+
+
+class ProviderError(AppError):
+    """Raised when an external LLM provider call fails."""

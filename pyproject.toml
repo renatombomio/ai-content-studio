@@ -5,6 +5,7 @@ description = "Modular platform for generating, editing and publishing cinematic
 requires-python = ">=3.12"
 dependencies = [
     "alembic>=1.18.5",
+    "anthropic>=0.120.2",
     "fastapi>=0.141.1",
     "pydantic-settings>=2.14.2",
     "sqlalchemy>=2.0.51",

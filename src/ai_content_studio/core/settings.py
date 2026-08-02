@@ -12,3 +12,5 @@ class Settings(BaseSettings):
     environment: str = "development"
     debug: bool = True
     database_url: str = "sqlite:///./data/studio.db"
+    anthropic_api_key: str | None = None
+    anthropic_model: str = "claude-sonnet-4"
