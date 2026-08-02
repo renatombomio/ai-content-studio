@@ -4,6 +4,8 @@ import uuid
 
 from pydantic import BaseModel, Field
 
+from ai_content_studio.shared.models.emotion import Emotion
+
 
 class Scene(BaseModel):
     """A single scene in a story."""
@@ -12,5 +14,5 @@ class Scene(BaseModel):
     order: int
     narration: str
     visual_prompt: str
-    emotion: str
+    emotion: Emotion
     duration_seconds: float

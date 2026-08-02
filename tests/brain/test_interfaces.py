@@ -36,7 +36,7 @@ def test_brain_service_accepts_brain_implementation() -> None:
                         order=1,
                         narration="n",
                         visual_prompt="v",
-                        emotion="calm",
+                        emotion="acceptance",
                         duration_seconds=3.0,
                     )
                 ],
@@ -59,7 +59,7 @@ def test_brain_service_delegates_to_implementation() -> None:
                         order=1,
                         narration="n",
                         visual_prompt="v",
-                        emotion="joy",
+                        emotion="hope",
                         duration_seconds=4.0,
                     )
                 ],

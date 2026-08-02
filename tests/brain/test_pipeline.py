@@ -17,7 +17,7 @@ _FAKE_STORY = {
             "order": 1,
             "narration": "A man kneels in red soil, pressing a seed into the ground.",
             "visual_prompt": "Extreme close-up of weathered hands pressing a seed into dark earth, golden afternoon light.",
-            "emotion": "quiet hope",
+            "emotion": "hope",
             "duration_seconds": 5.0,
         },
         {
@@ -31,7 +31,7 @@ _FAKE_STORY = {
             "order": 3,
             "narration": "A young woman picks the first pod. She does not know the story yet.",
             "visual_prompt": "A woman's hand reaching for a ripe cacao pod, sun filtering through leaves.",
-            "emotion": "tender melancholy",
+            "emotion": "melancholy",
             "duration_seconds": 6.0,
         },
     ],

@@ -10,7 +10,7 @@ def _make_scene(**kwargs: object) -> Scene:
         "order": 1,
         "narration": "Welcome to Cocoa Talk.",
         "visual_prompt": "A warm coffee shop at sunrise.",
-        "emotion": "calm",
+        "emotion": "acceptance",
         "duration_seconds": 5.0,
     }
     defaults.update(kwargs)  # type: ignore[arg-type]
