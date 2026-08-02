@@ -1,11 +1,13 @@
 """Application settings definition."""
 
-from pydantic import BaseModel
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseModel):
-    """Top-level application settings."""
+class Settings(BaseSettings):
+    """Top-level application settings loaded from environment / .env file."""
 
-    app_name: str = "AI Content Studio"
-    version: str = "0.1.0"
-    debug: bool = False
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+
+    app_name: str = "The Cocoa Talk Studio"
+    environment: str = "development"
+    debug: bool = True

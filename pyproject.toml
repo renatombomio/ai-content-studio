@@ -5,6 +5,7 @@ description = "Modular platform for generating, editing and publishing cinematic
 requires-python = ">=3.12"
 dependencies = [
     "fastapi>=0.141.1",
+    "pydantic-settings>=2.14.2",
     "uvicorn>=0.52.1",
 ]
 
