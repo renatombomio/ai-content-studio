@@ -1,7 +1,7 @@
 import pytest
 from httpx import ASGITransport, AsyncClient
 
-from ai_content_studio.main import app
+from ai_content_studio.app import app
 
 
 @pytest.mark.asyncio

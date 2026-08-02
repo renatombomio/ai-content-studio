@@ -13,4 +13,4 @@ ENV PYTHONPATH=/app/src
 
 EXPOSE 8000
 
-CMD ["uv", "run", "uvicorn", "ai_content_studio.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uv", "run", "uvicorn", "ai_content_studio.app:app", "--host", "0.0.0.0", "--port", "8000"]
