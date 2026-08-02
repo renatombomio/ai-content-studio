@@ -11,3 +11,4 @@ class Settings(BaseSettings):
     app_name: str = "The Cocoa Talk Studio"
     environment: str = "development"
     debug: bool = True
+    database_url: str = "sqlite:///./data/studio.db"
