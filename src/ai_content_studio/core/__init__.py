@@ -1,6 +1,7 @@
 """Core module — configuration, logging, exceptions, and shared infrastructure."""
 
 from ai_content_studio.core.config import get_settings
+from ai_content_studio.core.dependencies import DatabaseDep, SettingsDep, get_db
 from ai_content_studio.core.exceptions import (
     AppError,
     AssetError,
@@ -31,7 +32,10 @@ from ai_content_studio.core.settings import Settings
 __all__ = [
     "get_settings",
     "get_logger",
+    "get_db",
     "Settings",
+    "SettingsDep",
+    "DatabaseDep",
     "AppError",
     "ConfigurationError",
     "ValidationError",
