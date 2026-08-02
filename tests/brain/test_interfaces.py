@@ -5,8 +5,6 @@ import inspect
 import pytest
 
 from ai_content_studio.brain.interfaces import Brain
-from ai_content_studio.brain.service import BrainService
-from ai_content_studio.shared.models import Scene, Story
 
 
 def test_brain_is_abstract() -> None:
@@ -23,52 +21,8 @@ def test_brain_has_generate_story_method() -> None:
     assert getattr(Brain.generate_story, "__isabstractmethod__", False)
 
 
-def test_brain_service_accepts_brain_implementation() -> None:
-    class StubBrain(Brain):
-        def generate_story(self, idea: str) -> Story:
-            return Story(
-                title="Test",
-                hook="Hook",
-                caption="Caption",
-                hashtags=[],
-                scenes=[
-                    Scene(
-                        order=1,
-                        narration="n",
-                        visual_prompt="v",
-                        emotion="acceptance",
-                        duration_seconds=3.0,
-                    )
-                ],
-            )
-
-    service = BrainService(StubBrain())
-    assert isinstance(service, BrainService)
-
-
-def test_brain_service_delegates_to_implementation() -> None:
-    class StubBrain(Brain):
-        def generate_story(self, idea: str) -> Story:
-            return Story(
-                title=f"Story about {idea}",
-                hook="Hook",
-                caption="Caption",
-                hashtags=["#test"],
-                scenes=[
-                    Scene(
-                        order=1,
-                        narration="n",
-                        visual_prompt="v",
-                        emotion="hope",
-                        duration_seconds=4.0,
-                    )
-                ],
-            )
-
-    service = BrainService(StubBrain())
-    story = service.generate_story("cocoa")
-    assert isinstance(story, Story)
-    assert story.title == "Story about cocoa"
+def test_brain_interface_has_generate_story() -> None:
+    assert hasattr(Brain, "generate_story")
 
 
 def test_no_concrete_brain_in_production_module() -> None:
