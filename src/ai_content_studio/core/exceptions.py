@@ -1,4 +1,4 @@
-"""Application-wide exception hierarchy."""
+"""Application-wide exception hierarchy rooted at AppError."""
 
 
 class AppError(Exception):
@@ -6,12 +6,32 @@ class AppError(Exception):
 
 
 class ConfigurationError(AppError):
-    """Raised when the application configuration is invalid."""
+    """Raised when the application is misconfigured or a required setting is missing."""
 
 
-class NotFoundError(AppError):
-    """Raised when a requested resource does not exist."""
+class ValidationError(AppError):
+    """Raised when input data fails validation."""
+
+
+class StorageError(AppError):
+    """Raised when a filesystem or storage operation fails."""
+
+
+class AssetError(AppError):
+    """Raised when an asset cannot be found, downloaded, or resolved."""
+
+
+class VideoError(AppError):
+    """Raised when video assembly or rendering fails."""
+
+
+class PublisherError(AppError):
+    """Raised when publishing to TikTok fails."""
+
+
+class SchedulerError(AppError):
+    """Raised when the scheduler cannot trigger or manage a job."""
 
 
 class PipelineError(AppError):
-    """Raised when a pipeline stage fails."""
+    """Raised when a pipeline stage fails and execution cannot continue."""

@@ -3,9 +3,14 @@
 from ai_content_studio.core.config import get_settings
 from ai_content_studio.core.exceptions import (
     AppError,
+    AssetError,
     ConfigurationError,
-    NotFoundError,
     PipelineError,
+    PublisherError,
+    SchedulerError,
+    StorageError,
+    ValidationError,
+    VideoError,
 )
 from ai_content_studio.core.logging import get_logger
 from ai_content_studio.core.paths import (
@@ -29,7 +34,12 @@ __all__ = [
     "Settings",
     "AppError",
     "ConfigurationError",
-    "NotFoundError",
+    "ValidationError",
+    "StorageError",
+    "AssetError",
+    "VideoError",
+    "PublisherError",
+    "SchedulerError",
     "PipelineError",
     "ROOT",
     "SRC",
