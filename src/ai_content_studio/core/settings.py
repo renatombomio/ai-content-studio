@@ -16,3 +16,4 @@ class Settings(BaseSettings):
     anthropic_model: str = "claude-sonnet-4-5"
     freepik_api_key: str | None = None
     pexels_api_key: str | None = None
+    pixabay_api_key: str | None = None
