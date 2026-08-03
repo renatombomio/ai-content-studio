@@ -4,21 +4,24 @@
 
 ## Vision
 
-The Cocoa Talk Studio is a purpose-built automation system for producing and publishing cinematic short-form videos on TikTok — exclusively for the Cocoa Talk brand.
+Cocoa Talk Studio is a purpose-built content automation system for the Cocoa Talk editorial brand.
 
-It is not a generic content platform. Every design decision serves one goal: publish two high-quality TikTok videos per week, autonomously, with minimal human intervention.
+It is not a generic AI video platform. Every design decision serves one goal: publish consistent, high-quality introspective content on TikTok — autonomously, twice per week.
+
+Cocoa Talk is an introspective content brand. Technology serves the brand. The brand drives every technical decision.
 
 ---
 
 ## Principles
 
-- **TikTok first.** The only supported platform. No feature exists to serve another.
-- **Cinematic storytelling.** Every video follows a deliberate narrative structure.
-- **Quality over quantity.** Two excellent videos beat ten mediocre ones.
+- **Brand first.** Every feature exists to serve the Cocoa Talk editorial identity. If it does not serve the brand, it does not get built.
+- **Typography-first video.** The writing is the story. Footage is the atmosphere. There is no voice-over.
+- **TikTok first.** The only publishing platform. No feature exists to serve another.
+- **Quality over quantity.** Two excellent videos per week beat ten mediocre ones.
 - **Automation first.** The system handles the full pipeline end-to-end by default.
-- **Human approval when needed.** Creative checkpoints exist; they are the exception, not the rule.
-- **Modular architecture.** Each stage of the pipeline is independently replaceable.
-- **Simplicity over unnecessary features.** Nothing is built speculatively.
+- **Human approval when needed.** Creative checkpoints are the exception, not the rule.
+- **Modular architecture.** Each pipeline stage is independently replaceable.
+- **Simplicity.** Nothing is built speculatively.
 
 ---
 
@@ -27,10 +30,11 @@ It is not a generic content platform. Every design decision serves one goal: pub
 | Sprint | Scope | Status |
 |--------|-------|--------|
 | Sprint 1 | Core infrastructure, Cocoa Talk identity, shared domain models | ✅ Completed |
-| Sprint 2 | Brain pipeline — StoryDirector, PromptBuilder, AnthropicProvider, StoryParser, AssetProvider interface | ✅ Completed |
-| Sprint 3 | Asset Engine — SearchQueryBuilder, FreepikProvider, PexelsProvider, PixabayProvider, AssetRanker, AssetService | ✅ Completed |
-| Sprint 4 | Video Engine — Timeline, Voice, Subtitles, FFmpeg Renderer | ✅ Completed |
-| Sprint 5 | Publisher — TikTok upload, Instagram upload, Upload Service | 🔄 Active |
+| Sprint 2 | Brain pipeline — StoryDirector, PromptBuilder, AnthropicProvider, StoryParser | ✅ Completed |
+| Sprint 3 | Asset Engine — providers, AssetRanker, AssetService | ✅ Completed |
+| Sprint 4 | Video Engine — Timeline, Voice (dormant), Subtitles, FFmpeg Renderer | ✅ Completed |
+| Sprint 5 | Publisher — TikTok OAuth, TikTokPublisher, PublicationService | ✅ Completed |
+| Sprint 6 | Cocoa Brain — editorial pillars, Spanish content, typography-first pipeline | 🔄 Planned |
 
 ---
 
@@ -42,163 +46,128 @@ It is not a generic content platform. Every design decision serves one goal: pub
 
 **Goal:** Establish a working, production-quality repository baseline.
 
-**Deliverables:**
-- Python 3.12 project with `uv`
-- FastAPI skeleton with `/health` endpoint
-- Ruff, MyPy, pytest configured and passing
-- Docker setup
-- Module structure: `brain`, `assets`, `editor`, `voice`, `publisher`, `analytics`, `shared`, `brands`
-- `brands/cocoa-talk/` placeholder
-- `CLAUDE.md`, `README.md`
-
 **Definition of Done:** All checks pass. Repository is committed and pushed.
 
 ---
 
-### Phase 1 — Core
+### Phase 1 — Core ✅
 
-**Goal:** Establish the technical foundation every subsequent module depends on.
+**Goal:** Establish the technical foundation every module depends on.
 
 **Deliverables:**
-- Configuration management (environment-based, typed)
-- Application settings with validation
-- Structured logging
-- Database setup and migration baseline
-- Dependency injection container
+- Typed settings, structured logging, database baseline, dependency injection
 
-**Definition of Done:** Application starts cleanly, loads config from environment, logs structured output, connects to the database. All tests pass.
+**Definition of Done:** Application starts cleanly, loads config from environment, connects to the database.
 
 ---
 
-### Phase 2 — Cocoa Talk Identity
+### Phase 2 — Cocoa Talk Identity ✅
 
-**Goal:** Define the Cocoa Talk brand so the system can produce content that is consistent and recognizable.
+**Goal:** Define the Cocoa Talk brand so the system produces recognisable content.
 
 **Deliverables:**
-- Brand profile (name, tone, audience, mission)
-- Writing style guide (vocabulary, sentence structure, forbidden patterns)
-- Voice profile (TTS persona, pacing, energy)
-- Visual identity (color palette, typography, overlay style)
-- Publishing schedule (days, times, cadence)
+- Brand profile, writing style, visual identity, content pillars
+- `docs/BRAND.md` — editorial bible
+- `docs/COCO.md` — mascot reference
 
-**Definition of Done:** Brand configuration is fully loaded at runtime and accessible to every module. Identity is documented and version-controlled.
+**Definition of Done:** Brand identity is fully documented and version-controlled.
 
 ---
 
 ### Phase 3 — Brain ✅
 
-**Goal:** Automate ideation, scripting, and scene planning using an LLM.
+**Goal:** Automate ideation and scripting using an LLM.
 
 **Deliverables:**
-- Idea generation — produces ranked video concepts aligned with the brand
-- Script writing — transforms an idea into a narrated script
-- Scene planning — breaks the script into visual scenes with direction notes
-- Captions — generates on-screen text per scene
-- Hashtag generation — produces a curated TikTok hashtag set per video
+- `StoryDirector`, `PromptBuilder`, `AnthropicProvider`, `StoryParser`, `BrainService`
+- Stories generated natively in Spanish
+- Editorial pillars embedded in prompt generation
 
-**Output format:** All Brain outputs are structured JSON. No free text passed between modules.
-
-**Definition of Done:** Given a topic, the Brain produces a complete, validated JSON production plan ready for the Asset Engine.
+**Output:** Validated `Story` object — structured JSON consumed by downstream stages.
 
 ---
 
 ### Phase 4 — Asset Engine ✅
 
-**Goal:** Source every visual asset required by the production plan.
+**Goal:** Source cinematic footage for every scene.
 
-**Providers (searched in parallel, ranked by score):**
-1. Freepik (Magnific API)
-2. Pexels
-3. Pixabay
+**Providers:** Pexels (primary), Pixabay (secondary), Freepik (optional)
 
 **Deliverables:**
-- SearchQueryBuilder — derives a visual search query from a Scene
-- AssetProvider interface — common contract for all providers
-- FreepikProvider — Freepik image and vector search via Magnific API
-- PexelsProvider — Pexels photo and video search
-- PixabayProvider — Pixabay image and video search
-- AssetRanker — scores assets by orientation, type, resolution, duration, and emotion
-- AssetService — orchestrates providers, merges results, deduplicates, ranks
+- `SearchQueryBuilder`, `AssetProvider`, `PexelsProvider`, `PixabayProvider`, `FreepikProvider`, `AssetRanker`, `AssetService`
+- Search parameters: vertical orientation, Spanish language context, cinematic visual language
 
-**Definition of Done:** Given a Scene, the Asset Engine returns a ranked, deduplicated list of assets from all available providers.
-
-**Sprint 3 Tasks:**
-
-| Task | Description | Status |
-|------|-------------|--------|
-| S3-001 | Search Query Builder | ✅ Completed |
-| S3-002 | API Research & Provider Contract | ✅ Completed |
-| S3-003 | Asset Domain Model Revision | ✅ Completed |
-| S3-004 | FreepikProvider | ✅ Completed |
-| S3-005 | PexelsProvider | ✅ Completed |
-| S3-006 | AssetRanker | ✅ Completed |
-| S3-007 | AssetService | ✅ Completed |
-| S3-008 | PixabayProvider | ✅ Completed |
-| S3-009 | End-to-End Asset Pipeline | ✅ Completed |
+**Definition of Done:** Given a Scene, the Asset Engine returns a ranked list of vertical footage candidates.
 
 ---
 
-### Phase 5 — Video Engine ✅ Sprint 4
+### Phase 5 — Video Engine ✅
 
-**Goal:** Assemble all assets into a finished, ready-to-upload TikTok video.
+**Goal:** Assemble footage and typography into a finished TikTok video.
+
+**Architecture change from original plan:**
+- Voice synthesis is **dormant**, not removed. `VoiceProvider` remains in the codebase. `voice_track` on `Timeline` is optional.
+- Typography (subtitles) is now the **primary storytelling element**, not a secondary overlay.
+- Music is selected inside TikTok. The pipeline produces no audio track.
 
 **Deliverables:**
-- Timeline builder — maps scenes, assets, and captions to a timeline
-- FFmpeg pipeline — handles cuts, overlays, and compositing
-- Subtitle renderer — burns in captions with brand typography
-- Music layer — selects and mixes background audio
-- Transitions — scene-to-scene transitions consistent with brand style
-- Renderer — exports final video in TikTok-compatible format (9:16, ≤ 10 min)
+- `Timeline`, `TimelineBuilder`, `SubtitleGenerator`, `FFmpegRenderer`, `RenderService`
+- Renderer produces silent video with animated typography
 
-**Definition of Done:** Given a production plan with resolved assets, the engine renders a single `.mp4` file ready for publishing.
-
-**Sprint 4 Tasks:**
-
-| Task | Description | Status |
-|------|-------------|--------|
-| S4-001 | Timeline Domain | ✅ Completed |
-| S4-002 | Timeline Builder | ✅ Completed |
-| S4-003 | Voice Engine (TTS) | ✅ Completed |
-| S4-004 | Subtitle Generator | ✅ Completed |
-| S4-005 | FFmpeg Renderer | ✅ Completed |
-| S4-006 | Render Service | ✅ Completed |
-| S4-007 | End-to-End Render Pipeline | ✅ Completed |
+**Definition of Done:** Given a Story and assets, the engine renders a 9:16 MP4 ready for upload.
 
 ---
 
-### Phase 6 — Publisher
+### Phase 6 — Cocoa Brain ✅ Planned
 
-**Goal:** Upload the finished video to TikTok automatically.
+**Goal:** Full editorial automation aligned with the Cocoa Talk brand identity.
 
 **Deliverables:**
-- TikTok Publisher
-- Instagram Publisher
-- Upload Service
-- Publication Pipeline
 
-**Definition of Done:** The Publisher uploads a video to TikTok unattended, confirms the post is live, and stores the published URL.
+| Task | Description |
+|------|-------------|
+| S6-001 | Make `voice_provider` optional in `RenderService`. Remove from default pipeline path. |
+| S6-002 | Add `EditorialPillar` enum to `CreativeBrief`. Update `StoryDirector` to use it. |
+| S6-003 | Update `story_prompt.md` with editorial pillars and Spanish-first writing. |
+| S6-004 | Update `SearchQueryBuilder` visual mappings for cinematic, warm, autumn aesthetics. |
+| S6-005 | End-to-end pipeline bring-up: typography-first silent video with real assets. |
+| S6-006 | `Carousel` model + `CarouselGenerator` in Brain. |
+| S6-007 | `CarouselRenderer` — produce two-slide carousel image set. |
+| S6-008 | Cocoa Question of the Week — weekly carousel automation. |
 
 ---
 
-### Phase 7 — Automation
+### Phase 7 — Publisher ✅ Completed (Sprint 5)
+
+TikTok OAuth, upload, status polling, `PublicationService` — fully implemented.
+
+---
+
+### Phase 8 — Automation
 
 **Goal:** The Studio operates weekly without manual triggering.
 
 **Deliverables:**
-- Scheduler
-- Content Calendar
-- Retry System
-- Monitoring
-- Analytics
+- Scheduler, Content Calendar, Retry System, Monitoring
 
-**Definition of Done:** The Studio autonomously publishes two high-quality TikTok videos every week. Failures are recovered or escalated without human initiation.
+**Definition of Done:** The Studio autonomously publishes two videos and one carousel per week.
+
+---
+
+## Content Output Target
+
+| Format | Frequency | Pipeline |
+|---|---|---|
+| Vertical video (9:16) | 2× per week | Brain → Assets → Typography → FFmpeg → TikTok |
+| Cocoa Question carousel | 1× per week | Brain → Carousel generator → Canva/image render → TikTok |
 
 ---
 
 ## Future Ideas
 
-- Analytics dashboard tracking views, retention, and follower growth per video
-- A/B testing for thumbnails and captions
-- Audience feedback loop feeding into idea generation
-- Support for TikTok Series or multi-part narratives
-- Voice cloning for a consistent Cocoa Talk narrator persona
+- ElevenLabs integration when premium voice is needed
+- Analytics dashboard (views, retention, follower growth)
+- Audience feedback loop into idea generation
+- Mascot-led video format featuring Coco
+- Multi-slide carousel for longer reflective pieces
+- Voice cloning for a consistent Cocoa Talk narrator

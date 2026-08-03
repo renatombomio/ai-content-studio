@@ -8,10 +8,12 @@ dependencies = [
     "anthropic>=0.120.2",
     "fastapi>=0.141.1",
     "kokoro>=0.9.4",
+    "numpy<2",
     "pydantic-settings>=2.14.2",
     "soundfile>=0.14.0",
     "sqlalchemy>=2.0.51",
     "torch==2.2.2",
+    "transformers>=4.40,<5",
     "uvicorn>=0.52.1",
 ]
 

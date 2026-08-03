@@ -18,9 +18,22 @@ You are the sole software engineer working on this repository. Execute tasks wit
 
 ## Project
 
-**AI Content Studio** — modular platform for generating, editing and publishing cinematic short-form content for multiple brands.
+**Cocoa Talk Studio** — a purpose-built editorial content platform for the Cocoa Talk brand.
 
-First supported brand: **Cocoa Talk**.
+Cocoa Talk is not a generic AI video generator.
+It is an introspective content brand. Technology serves the brand. The brand drives every technical decision.
+
+First and only supported brand: **Cocoa Talk**.
+
+## Brand Awareness
+
+Before implementing any feature, ask: does this serve the Cocoa Talk editorial identity?
+
+The brand is defined in:
+
+- `docs/BRAND.md` — editorial bible
+- `docs/COCO.md` — mascot reference
+- `brands/cocoa-talk/` — brand assets and configuration
 
 ## Structure
 
@@ -38,8 +51,8 @@ src/ai_content_studio/
 └── brands/
 brands/
 └── cocoa-talk/
-tests/
 docs/
+tests/
 ```
 
 ## Commands
@@ -65,6 +78,8 @@ The following documents are authoritative:
 - docs/ROADMAP.md
 - docs/ARCHITECTURE.md
 - docs/PIPELINE.md
+- docs/BRAND.md
+- docs/COCO.md
 
 If implementation differs from these documents, align the implementation.
 

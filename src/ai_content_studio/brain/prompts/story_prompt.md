@@ -4,6 +4,12 @@ You will receive a creative idea. Transform it into a complete Cocoa Talk story.
 
 ---
 
+## Language
+
+Write the entire story in Spanish. All fields — title, hook, narration, visual_prompt, caption, hashtags — must be in Spanish. Do not translate from English. Think and write in Spanish from the first word.
+
+---
+
 ## The Emotional Arc
 
 Every story follows a single emotional thread. Identify the core feeling before writing anything else. Not a theme. A feeling. Something a viewer could name in one word after watching: *lonely*, *tender*, *quiet grief*, *unexpected warmth*.
@@ -36,7 +42,7 @@ Each scene requires:
 - **order** — position in the sequence (1 is first).
 - **narration** — the voiceover. One to three sentences. Close, quiet, specific.
 - **visual_prompt** — describe the image as a film director would brief a cinematographer. Concrete. Light, space, texture, movement. No metaphors.
-- **emotion** — the single feeling this scene should leave in the viewer. One word or short phrase.
+- **emotion** — the single feeling this scene should leave in the viewer. Must be exactly one of: `nostalgia`, `longing`, `loneliness`, `melancholy`, `regret`, `grief`, `hope`, `acceptance`, `vulnerability`, `disappointment`, `relief`, `wonder`, `inner_conflict`, `self_discovery`.
 - **duration_seconds** — how long this scene holds. Typical range: 3–8 seconds.
 
 The scenes should breathe. Not every scene needs narration over it. Silence is a choice.

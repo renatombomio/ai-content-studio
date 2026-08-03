@@ -5,18 +5,36 @@
 ## Pipeline Overview
 
 ```
-Idea
+Brand Context (Cocoa Talk identity)
  ↓
-Brain Engine    →  Structured Story
+Brain Engine    →  Structured Story (Spanish)
  ↓
-Asset Engine    →  Resolved Assets
+Asset Engine    →  Cinematic Footage (vertical, warm)
  ↓
-Video Engine    →  TikTok-ready MP4
+Video Engine    →  Typography-first MP4 (silent)
  ↓
 Publisher       →  Live TikTok Post
 ```
 
+The Brand Context is not a runtime module. It is the identity embedded in prompts, defaults, and editorial decisions. Every generation begins with the Cocoa Talk identity.
+
 Each stage consumes the output of the previous one. No stage reaches backward or sideways into another stage's internals.
+
+---
+
+## Brand Layer
+
+The Brand Layer is not a software module. It is the editorial foundation that every module serves.
+
+**It lives in:**
+- `docs/BRAND.md` — the editorial bible
+- `docs/COCO.md` — the mascot reference
+- `brands/cocoa-talk/` — brand assets and configuration
+- `src/ai_content_studio/brain/prompts/` — identity embedded into every LLM prompt
+
+**Every generation starts here.** The `system_prompt.md` is the Cocoa Talk identity, loaded before any LLM call. The `story_prompt.md` enforces the writing philosophy, the language (Spanish), and the editorial pillar.
+
+If a feature violates the brand identity, it does not get built.
 
 ---
 
@@ -32,170 +50,202 @@ The technical foundation. Every other module depends on Core; Core depends on no
 - Application configuration and environment loading
 - Typed settings with validation
 - Structured logging
-- Dependency injection container
-- Shared infrastructure services (HTTP client, database session, etc.)
+- Dependency injection
+- Shared infrastructure (HTTP client, database session)
 
-**Boundaries:** Core contains no business logic. It provides capabilities; it makes no decisions about content, assets, or publishing.
+**Boundaries:** No business logic. No editorial decisions.
 
 ---
 
 ### Brain
 
-The creative engine. The Brain transforms a topic or idea into a complete, structured production plan.
+The creative engine. Transforms a topic or editorial pillar into a complete, structured production plan — entirely in Spanish.
 
 **Responsibilities:**
-- Generate ranked video ideas aligned with the Cocoa Talk brand
-- Write a narrated script for a selected idea
-- Plan scenes: visual direction, timing, and on-screen text
-- Generate captions per scene
-- Generate a curated TikTok hashtag set
+- Accept a `CreativeBrief` with an `EditorialPillar` and optional `ContentType`
+- Generate original Cocoa Talk writing aligned with the brand voice
+- Plan scenes with visual direction and on-screen text
+- Generate caption and curated hashtags
+- Parse and validate LLM output into a `Story` object
 
 **Components:**
 - `StoryDirector` — orchestrates the full Brain pipeline
-- `PromptBuilder` — constructs LLM prompts from a CreativeBrief
+- `PromptBuilder` — constructs LLM prompts from identity + brief
 - `AnthropicProvider` — LLM backend (Claude)
-- `StoryParser` — parses and validates LLM output into a StructuredStory
-- `BrainService` — public interface for the Brain module
+- `StoryParser` — parses and validates LLM output into `Story`
+- `BrainService` — public interface
 
-**Output:** A single Structured Story object — a validated, machine-readable production plan consumed by downstream stages.
+**Language:** All generated content is in Spanish by default.
 
-**Boundaries:** The Brain generates text and structure only. It never downloads assets, edits video, or publishes content.
+**Editorial pillars:** `SHADOW_WORK`, `POETIC`, `INTRAPERSONAL`, `MENTAL_HEALTH`
+
+**Output:** A validated `Story` object — structured JSON consumed by downstream stages.
+
+**Boundaries:** Generates text and structure only. Never downloads assets, edits video, or publishes.
 
 ---
 
 ### Asset Engine
 
-The resource resolver. The Asset Engine takes a Structured Story and finds the best visual assets for every scene.
+The footage resolver. Sources vertical, cinematic footage for every scene.
 
 **Responsibilities:**
-- Derive a visual search query from each scene
-- Search all configured providers in parallel
-- Merge, deduplicate, and rank results by relevance
+- Derive a visual search query from each scene (emotion + narration → search terms)
+- Search all configured providers (vertical orientation, Spanish context)
+- Merge, deduplicate, and rank results by relevance to the scene
 - Return a ranked asset list per scene
 
 **Components:**
-- `SearchQueryBuilder` — derives a visual search query from a Scene
-- `AssetProvider` — abstract interface implemented by all providers
-- `FreepikProvider` — Freepik image and vector search (Magnific API)
-- `PexelsProvider` — Pexels photo and video search
-- `PixabayProvider` — Pixabay image and video search
-- `AssetRanker` — scores assets by orientation, type, resolution, duration, and emotion affinity
-- `AssetService` — orchestrates providers, merges results, deduplicates, ranks
+- `SearchQueryBuilder` — visual search query from a Scene; biased toward warm, cinematic aesthetics
+- `AssetProvider` — abstract interface
+- `PexelsProvider` — primary provider
+- `PixabayProvider` — secondary provider (vertical, Spanish)
+- `FreepikProvider` — optional (requires API key)
+- `AssetRanker` — scores by orientation (portrait preferred), type, resolution, duration, emotion
+- `AssetService` — orchestrates, merges, deduplicates, ranks
 
-**Output:** Ranked, deduplicated list of Assets per Scene.
+**Output:** Ranked `Asset` list per `Scene`.
 
-**Boundaries:** The Asset Engine selects and retrieves media. It never edits video or publishes content.
+**Boundaries:** Selects and retrieves media only. Never edits video or publishes.
 
 ---
 
 ### Video Engine
 
-The production suite. The Video Engine assembles assets and story structure into a finished video.
+The production suite. Assembles footage and typography into a finished silent video.
+
+**Architecture note — Typography-first:**
+There is no voice-over in the default pipeline. The written narration appears as animated subtitles over cinematic footage. Typography is the primary storytelling element.
+
+Voice synthesis (`VoiceProvider`) is **dormant** — present in the codebase but not called by default. `voice_provider` is optional in `RenderService`. When it is `None`, the pipeline produces a silent video. This is the current production mode.
+
+Voice will be re-enabled when a premium provider (e.g. ElevenLabs) is integrated.
 
 **Responsibilities:**
 - Build a scene timeline from the production plan
-- Generate narration audio via TTS
-- Generate subtitles from scene captions
-- Composite video clips, images, and overlays via FFmpeg
-- Render and export a TikTok-compatible MP4 (9:16 aspect ratio)
+- Generate animated subtitle cues from scene narration
+- Composite vertical footage clips via FFmpeg
+- Render and export a silent TikTok-compatible MP4 (9:16)
 
 **Components:**
-- `Timeline` — domain model representing the timed sequence of clips
-- `TimelineBuilder` — constructs a Timeline from a Story and resolved assets
-- `VoiceEngine` — text-to-speech narration generation
-- `Renderer` — FFmpeg-based video assembly and export
+- `Timeline` — domain model for the timed clip sequence
+- `TimelineBuilder` — constructs `Timeline` from `Story` + assets
+- `SubtitleGenerator` — derives timed subtitle cues from narration; primary storytelling layer
+- `VoiceProvider` / `KokoroProvider` — dormant; interface preserved for future ElevenLabs integration
+- `FFmpegRenderer` — video assembly and export
+- `RenderService` — orchestrates Timeline → subtitles → render
 
-**Input:** Structured Story + resolved asset manifest.
+**Input:** `Story` + resolved asset manifest.
+**Output:** Silent `.mp4` ready for upload. Music is selected inside TikTok.
 
-**Output:** A single rendered `.mp4` file ready for upload.
-
-**Boundaries:** The Video Engine renders only. It never generates content or publishes.
+**Boundaries:** Renders only. Never generates content or publishes.
 
 ---
 
 ### Publisher
 
-The delivery layer. The Publisher handles the final step: getting the rendered video onto TikTok.
+The delivery layer. Uploads the finished video to TikTok.
 
 **Responsibilities:**
-- Maintain a persistent, authenticated browser session via Playwright
-- Upload the rendered video file
+- OAuth token exchange and refresh (TikTok)
+- Upload the rendered video file via TikTok Content Posting API
 - Set caption and hashtags
-- Select or set the publish time (immediate or scheduled)
-- Confirm the post is live and capture the published URL
+- Poll publication status until confirmed live or failed
+- Store publication record
 
 **Components:**
-- `TikTokPublisher` — TikTok upload and confirmation
-- `InstagramPublisher` — Instagram upload and confirmation
-- Upload Service — shared upload orchestration
+- `TikTokOAuth` — token exchange and refresh
+- `TikTokPublisher` — video upload and status polling
+- `PublicationService` — orchestrates OAuth → upload → polling
+- `Publisher` (ABC) — abstract interface
+- `OAuthProvider` (ABC) — abstract OAuth contract
 
-**Boundaries:** The Publisher uploads and confirms. It never generates content, selects assets, or edits video.
+**Boundaries:** Uploads and confirms. Never generates content or edits video.
 
 ---
 
 ### Scheduler
 
-The automation controller. The Scheduler owns the weekly production cadence and job lifecycle.
+The automation controller. Manages the weekly production cadence.
 
 **Responsibilities:**
-- Determine when to trigger a new production run (twice per week)
-- Invoke the pipeline in sequence
+- Trigger pipeline runs on schedule (2× video per week, 1× carousel per week)
 - Retry failed stages with backoff
-- Escalate unrecoverable failures via notification
-- Log job history and outcomes
+- Escalate unrecoverable failures
+- Log job history
 
-**Components:**
-- `Scheduler` — triggers and monitors pipeline runs
-- `Calendar` — manages the publishing schedule
-- `Monitoring` — tracks job health and surfaces failures
-
-**Boundaries:** The Scheduler coordinates timing and recovery. It contains no content or media logic.
+**Boundaries:** Coordinates timing and recovery. No content or media logic.
 
 ---
 
 ### Storage
 
-The persistence layer. Storage provides a consistent interface to all durable data.
+The persistence layer.
 
 **Responsibilities:**
-- Local asset library (downloaded media files)
+- Local asset library (downloaded footage)
 - Asset and render cache
 - Project records (ideas, scripts, production plans)
 - Published post metadata
-- General key-value and binary storage
 
-**Boundaries:** Storage contains no business logic. It persists and retrieves; it makes no decisions.
+**Boundaries:** Persists and retrieves. No business logic.
 
 ---
 
 ### Shared
 
-The common vocabulary. Shared provides types, contracts, and utilities used across modules.
+The common vocabulary. Types, contracts, and utilities used across modules.
 
 **Responsibilities:**
-- Domain types and data models (e.g., `StructuredStory`, `Scene`, `Asset`, `Emotion`, `CreativeBrief`)
-- Interfaces and protocols that decouple modules from concrete implementations
-- Project-wide constants
-- Pure utility functions with no side effects
+- Domain models: `Story`, `Scene`, `Asset`, `Emotion`, `CreativeBrief`, `Publication`, `Timeline`
+- Enums: `Emotion`, `PublicationStatus`, `EditorialPillar`, `ContentType`
+- Abstract interfaces decoupling modules from concrete implementations
+- Pure utility functions
 
-**Boundaries:** Shared contains no module-specific logic and no side effects. No module other than Shared defines cross-cutting types.
+**Boundaries:** No module-specific logic. No side effects.
 
 ---
 
 ## Architectural Principles
 
-- **Single Responsibility.** Each module owns one concern. A module that generates content does not touch the filesystem. A module that edits video does not call external APIs.
+- **Brand first.** Every feature serves the Cocoa Talk editorial identity.
+- **Single Responsibility.** Each module owns one concern.
+- **Loose Coupling.** Modules communicate through well-defined data contracts.
+- **High Cohesion.** Unrelated logic belongs in the appropriate module or Shared.
+- **Modular Design.** Any module can be replaced independently, provided its contract is preserved.
+- **Small Public Interfaces.** Implementation details stay private.
+- **Testability.** Dependencies are injected, not hardcoded.
+- **Automation First.** The default path requires no human input.
+- **Simplicity.** No abstraction is introduced without a concrete need.
 
-- **Loose Coupling.** Modules communicate through well-defined data contracts (e.g., `StructuredStory`). No module imports the internals of another.
+---
 
-- **High Cohesion.** Everything inside a module belongs there. Unrelated logic is moved to the appropriate module or to Shared.
+## Content Type Architecture
 
-- **Modular Design.** Any module can be replaced or upgraded independently without affecting the others, provided its interface contract is preserved.
+The pipeline supports two output types:
 
-- **Small Public Interfaces.** Each module exposes the minimum surface needed by its consumers. Implementation details remain private.
+### Video (current)
 
-- **Testability.** Modules are designed to be tested in isolation. Dependencies are injected, not hardcoded.
+```
+CreativeBrief(pillar, content_type=VIDEO)
+ ↓ Brain
+Story (Spanish narration + scenes)
+ ↓ Asset Engine
+Assets (vertical footage)
+ ↓ Video Engine
+Silent MP4 (typography over footage)
+ ↓ Publisher
+TikTok post
+```
 
-- **Automation First.** The default execution path requires no human input. Human checkpoints are explicit, optional, and narrow in scope.
+### Carousel (planned — Sprint 6)
 
-- **Simplicity.** No abstraction is introduced without a concrete need. The system is extended only when the product requires it.
+```
+CreativeBrief(pillar, content_type=CAROUSEL)
+ ↓ Brain (CarouselGenerator)
+Carousel (slides with question + brand identity)
+ ↓ CarouselRenderer
+Image set (2 slides)
+ ↓ Publisher
+TikTok carousel post
+```

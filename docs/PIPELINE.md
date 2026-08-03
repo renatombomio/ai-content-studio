@@ -5,24 +5,40 @@
 ## Overview
 
 ```
-Idea
+Brand Context
+ ↓
+Idea / Editorial Pillar
  ↓
 Brain Engine
  ↓
-Story
+Story (Spanish)
  ↓
 Asset Engine
  ↓
 Timeline Builder
  ↓
-Timeline
+Subtitle Generator
  ↓
-Voice Engine
- ↓
-Rendered Video
+FFmpeg Renderer (silent)
  ↓
 TikTok Publisher
+(music selected inside TikTok)
 ```
+
+The pipeline produces a **silent vertical video**. Typography is the primary storytelling element. Music is added by the creator inside TikTok after upload.
+
+---
+
+## Output Types
+
+The pipeline supports two distinct output formats:
+
+| Type | Trigger | Output |
+|---|---|---|
+| **Video** | `ContentType.VIDEO` | Silent 9:16 MP4 with animated subtitles |
+| **Carousel** | `ContentType.CAROUSEL` | Two-slide image set |
+
+Both begin with a `CreativeBrief` and the Brain Engine. They diverge after story generation.
 
 ---
 
@@ -30,152 +46,195 @@ TikTok Publisher
 
 | Stage | Module | Status |
 |-------|--------|--------|
-| Idea / Brief | Brain — StoryDirector | ✅ Sprint 2 |
+| Brand Context | `brain/prompts/` | ✅ Sprint 2 |
 | Brain | Brain — PromptBuilder, AnthropicProvider, StoryParser | ✅ Sprint 2 |
-| Asset Engine | assets — SearchQueryBuilder, providers, AssetRanker, AssetService | ✅ Sprint 3 |
-| Video Engine | video — Timeline, VoiceEngine, Renderer | 🔄 Sprint 4 |
-| Publisher | publisher | ⬜ Planned |
-| Scheduler | scheduler | ⬜ Planned |
+| Asset Engine | assets — SearchQueryBuilder, providers, AssetRanker | ✅ Sprint 3 |
+| Video Engine | video — Timeline, SubtitleGenerator, FFmpegRenderer | ✅ Sprint 4 |
+| Voice Engine | video/voice — KokoroProvider | ✅ Completed / Dormant |
+| Publisher | publisher — TikTokOAuth, TikTokPublisher, PublicationService | ✅ Sprint 5 |
+| Carousel Engine | video/carousel — CarouselGenerator, CarouselRenderer | ⬜ Sprint 6 |
+| Scheduler | scheduler | ⬜ Phase 8 |
 
 ---
 
-## Stages
+## Pipeline A — Vertical Video
 
 ---
 
-### 1. Idea
+### Stage 1: Brand Context
 
-**Purpose:** Start the creative process by defining what the video is about.
+**Purpose:** Establish the Cocoa Talk identity before any generation begins.
 
-**Input:** A topic, prompt, or signal from the Scheduler.
+**How:** The `system_prompt.md` is loaded and passed as the system message to every LLM call. It encodes the brand voice, writing philosophy, and visual thinking principles.
 
-**Output:** Creative Brief — a minimal structured object describing the video concept, target audience, and tone.
+This stage is not a runtime call. It is a design constraint embedded in the Brain module.
+
+---
+
+### Stage 2: Brief
+
+**Purpose:** Define what the video is about.
+
+**Input:** A topic or idea. An `EditorialPillar` (`SHADOW_WORK`, `POETIC`, `INTRAPERSONAL`, `MENTAL_HEALTH`).
+
+**Output:** `CreativeBrief` — structured object with idea, primary emotion, theme, pillar, and target duration.
 
 **Responsible Module:** Brain (intake) / Scheduler (trigger)
 
-**Failure Handling:** If no valid idea can be formed, the pipeline does not start. The Scheduler logs the failure and retries on the next scheduled run.
-
 ---
 
-### 2. Brain Engine
+### Stage 3: Brain Engine
 
-**Purpose:** Transform the Creative Brief into a complete, machine-readable production plan.
+**Purpose:** Transform the brief into a complete, structured production plan in Spanish.
 
-**Input:** Creative Brief
+**Input:** `CreativeBrief`
 
-**Output:** Structured Story containing:
-- `title` — video title
-- `hook` — opening line designed to retain viewers
-- `scenes` — ordered list of scenes, each with narration, visual direction, and caption text
-- `caption` — full TikTok post caption
-- `hashtags` — curated hashtag set
+**Output:** `Story` containing:
+- `title` — Spanish video title
+- `hook` — opening line (specific, close, earns the next ten seconds)
+- `scenes` — ordered list, each with `narration`, `visual_prompt`, `emotion`, `duration_seconds`
+- `caption` — TikTok post caption in Spanish
+- `hashtags` — curated set (3–7, relevant, never generic)
+
+**Language:** Always Spanish. The LLM is instructed to think and write in Spanish from the first word.
 
 **Responsible Module:** Brain
 
-**Failure Handling:** If the LLM returns an invalid or incomplete response, the Brain retries up to a configured limit. Persistent failure stops the pipeline and notifies the operator. The Brain never proceeds with a partially valid story.
+**Failure Handling:** Invalid LLM output triggers a retry (up to configured limit). The pipeline never proceeds with a partially valid story.
 
 ---
 
-### 3. Asset Engine
+### Stage 4: Asset Engine
 
-**Purpose:** Resolve the best visual asset for every scene in the Structured Story.
+**Purpose:** Resolve cinematic vertical footage for every scene.
 
-**Input:** Structured Story (list of Scenes)
+**Input:** `Story` (list of `Scene` objects)
 
-**Output:** Ranked, deduplicated list of Assets per Scene.
+**Output:** Ranked `Asset` list per `Scene`.
 
 **Internal flow:**
-
 ```
 Scene
  ↓
-SearchQueryBuilder
+SearchQueryBuilder (emotion + narration → visual query, warm/cinematic bias)
  ↓
-Freepik
-Pexels
-Pixabay
+PexelsProvider (primary)
+PixabayProvider (vertical, Spanish, secondary)
+FreepikProvider (optional)
  ↓
-AssetRanker
+AssetRanker (portrait preferred, video preferred, duration match)
  ↓
 Assets
 ```
 
 **Responsible Module:** Asset Engine
 
-**Failure Handling:** If a provider is unavailable, the engine continues with the remaining providers. If all providers fail for a scene, AssetError is raised and the pipeline stops.
+**Failure Handling:** If one provider fails, the engine continues with the remaining. If all fail for a scene, `AssetError` is raised and the pipeline stops.
 
 ---
 
-### 4. Timeline Builder
+### Stage 5: Timeline Builder
 
-**Purpose:** Map scenes, assets, narration, and captions to a time-coded timeline.
+**Purpose:** Map scenes, assets, and narration to a time-coded sequence.
 
-**Input:** Structured Story + resolved assets per scene.
+**Input:** `Story` + resolved assets per scene.
 
-**Output:** Timeline — an ordered sequence of timed clips ready for rendering.
+**Output:** `Timeline` — ordered, timed clips.
 
 **Responsible Module:** Video Engine
 
-**Failure Handling:** Invalid or incomplete input stops the builder. No partial timelines are produced.
-
 ---
 
-### 5. Voice Engine
+### Stage 6: Subtitle Generator
 
-**Purpose:** Generate narration audio for each scene using text-to-speech.
+**Purpose:** Derive animated subtitle cues from scene narration.
 
-**Input:** Scene narration text.
+This is the **primary storytelling layer** of the video. There is no voice-over. The written narration appears on screen as animated typography over the footage.
 
-**Output:** Audio file per scene, attached to the timeline.
+**Input:** `Timeline`
+
+**Output:** List of `SubtitleCue` objects — timed text segments.
 
 **Responsible Module:** Video Engine
 
-**Failure Handling:** TTS failures stop the pipeline. The rendered audio is discarded and the error is surfaced.
+---
+
+### Stage 7: Voice Engine (Dormant)
+
+Voice synthesis is **disabled in the current production pipeline**.
+
+`VoiceProvider` and `KokoroProvider` remain in the codebase. `voice_track` on `Timeline` is optional. `RenderService` accepts `voice_provider: VoiceProvider | None = None`.
+
+When `voice_provider` is `None`, the renderer produces a silent video.
+
+Voice will be re-enabled when a premium provider (e.g. ElevenLabs) is integrated and the brand determines voice quality meets its standard.
 
 ---
 
-### 6. Rendered Video
+### Stage 8: FFmpeg Renderer
 
-**Purpose:** Assemble the timeline, assets, audio, and captions into a finished video.
+**Purpose:** Composite footage, animated subtitles, and produce the final silent MP4.
 
-**Input:** Timeline + audio files + caption text.
+**Input:** `Timeline` (with subtitle cues, without voice track).
 
-**Output:** Rendered MP4 — a single TikTok-compatible video file (9:16 aspect ratio) with subtitles and transitions applied.
+**Output:** Silent 9:16 MP4, TikTok-compatible.
 
-**Responsible Module:** Video Engine (FFmpeg Renderer)
+**Responsible Module:** Video Engine (FFmpegRenderer)
 
-**Failure Handling:** Rendering errors stop the pipeline immediately. The failed render is discarded. The Scheduler is notified and may retry the full pipeline or escalate to the operator.
+**Failure Handling:** Rendering errors stop the pipeline. The failed file is discarded.
 
 ---
 
-### 7. TikTok Publisher
+### Stage 9: TikTok Publisher
 
-**Purpose:** Upload the rendered video to TikTok and confirm the post is live.
+**Purpose:** Upload the video and confirm the post is live.
 
-**Input:** Rendered MP4 + caption + hashtags
+**Input:** Rendered MP4 + caption + hashtags.
 
-**Output:** Published TikTok post — confirmation that the video is live, including the post URL.
+**Output:** Published TikTok post URL.
 
 **Responsibilities:**
-- Open and maintain a persistent authenticated browser session
-- Upload the video file
-- Set caption, hashtags, and publish time
-- Confirm the post is publicly visible
-- Store the published URL in Storage
+- OAuth token exchange / refresh
+- Upload via TikTok Content Posting API (Direct Post)
+- Poll status until `PUBLISH_COMPLETE` or `FAILED`
+- Store publication record
+
+**Post-upload:** Music is selected by the creator inside TikTok. The pipeline does not produce or select music.
 
 **Responsible Module:** Publisher
 
-**Failure Handling:** If the upload fails, the Publisher retries up to a configured limit before surfacing the failure to the Scheduler. The rendered MP4 is preserved so the upload can be retried without re-rendering.
+---
+
+## Pipeline B — Carousel (Planned, Sprint 6)
+
+```
+CreativeBrief(content_type=CAROUSEL)
+ ↓
+CarouselGenerator (Brain)
+ ↓
+Carousel (2 slides)
+ ↓
+CarouselRenderer
+ ↓
+Image files (slide_01.png, slide_02.png)
+ ↓
+TikTok Publisher (carousel upload)
+```
+
+**Slide 1:** Brand identity card — Coco mascot, "Cocoa Question of the Week" typography.
+**Slide 2:** One reflective question — minimal, large typography, no distractions.
+
+Published once per week.
 
 ---
 
 ## Pipeline Principles
 
 - Every stage has one responsibility.
-- Every stage has a clearly defined input.
-- Every stage has a clearly defined output.
+- Every stage has a clearly defined input and output.
 - Data always flows forward.
 - No module may skip another module.
 - Modules communicate only through structured objects.
 - Every stage must be independently testable.
 - Failures must stop the pipeline gracefully.
+- The brand identity is embedded at Stage 1 and never overridden.

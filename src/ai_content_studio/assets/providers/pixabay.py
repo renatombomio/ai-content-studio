@@ -24,7 +24,14 @@ class PixabayProvider(AssetProvider):
         """Search Pixabay images and videos matching a visual query."""
         settings = get_settings()
         key = settings.pixabay_api_key or ""
-        params: dict[str, str | int] = {"key": key, "q": query, "per_page": limit, "safesearch": "true"}
+        params: dict[str, str | int] = {
+            "key": key,
+            "q": query,
+            "per_page": limit,
+            "safesearch": "true",
+            "orientation": "vertical",
+            "lang": "es",
+        }
 
         assets: list[Asset] = []
         try:

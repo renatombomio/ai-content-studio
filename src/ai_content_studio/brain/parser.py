@@ -1,6 +1,7 @@
 """Story parser — validates LLM JSON responses into Story models."""
 
 import json
+import re
 
 from pydantic import ValidationError as PydanticValidationError
 
@@ -17,7 +18,7 @@ class StoryParser:
         Raises ValidationError if the JSON is malformed or fails model validation.
         """
         try:
-            data = json.loads(response)
+            data = json.loads(_strip_fences(response))
         except json.JSONDecodeError as exc:
             raise ValidationError(f"Malformed JSON: {exc}") from exc
 
@@ -25,3 +26,9 @@ class StoryParser:
             return Story.model_validate(data)
         except PydanticValidationError as exc:
             raise ValidationError(f"Story validation failed: {exc}") from exc
+
+
+def _strip_fences(text: str) -> str:
+    """Remove markdown code fences if the LLM wrapped its JSON output."""
+    match = re.search(r"```(?:json)?\s*([\s\S]+?)\s*```", text)
+    return match.group(1) if match else text.strip()
