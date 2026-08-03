@@ -14,3 +14,4 @@ class Settings(BaseSettings):
     database_url: str = "sqlite:///./data/studio.db"
     anthropic_api_key: str | None = None
     anthropic_model: str = "claude-sonnet-4-5"
+    freepik_api_key: str | None = None
