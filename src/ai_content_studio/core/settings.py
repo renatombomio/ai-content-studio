@@ -19,3 +19,6 @@ class Settings(BaseSettings):
     pixabay_api_key: str | None = None
     kokoro_voice: str = "af_heart"
     kokoro_speed: float = 1.0
+    tiktok_client_id: str | None = None
+    tiktok_client_secret: str | None = None
+    tiktok_redirect_uri: str | None = None
