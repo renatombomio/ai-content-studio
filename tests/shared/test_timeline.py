@@ -1,6 +1,12 @@
 """Tests for Timeline domain models."""
 
-from ai_content_studio.shared.models import Timeline, TimelineAsset, TimelineScene
+from ai_content_studio.shared.models import (
+    SubtitleCue,
+    Timeline,
+    TimelineAsset,
+    TimelineScene,
+    VoiceTrack,
+)
 from ai_content_studio.shared.models.asset import Asset
 from ai_content_studio.shared.models.emotion import Emotion
 from ai_content_studio.shared.models.scene import Scene
@@ -139,3 +145,69 @@ def test_timeline_roundtrips_via_model_dump() -> None:
     tl2 = Timeline.model_validate(data)
     assert tl2.duration == tl.duration
     assert tl2.scenes[0].assets[0].end_time == 5.0
+
+
+# --- VoiceTrack ---
+
+def test_voice_track_creation() -> None:
+    vt = VoiceTrack(audio=b"RIFF....", sample_rate=24000, duration=5.0)
+    assert vt.sample_rate == 24000
+    assert vt.duration == 5.0
+    assert vt.audio == b"RIFF...."
+
+
+def test_voice_track_audio_is_bytes() -> None:
+    vt = VoiceTrack(audio=b"\x00\x01\x02", sample_rate=24000, duration=1.0)
+    assert isinstance(vt.audio, bytes)
+
+
+# --- SubtitleCue ---
+
+def test_subtitle_cue_creation() -> None:
+    cue = SubtitleCue(text="A farmer plants a seed.", start_time=0.0, end_time=3.0)
+    assert cue.text == "A farmer plants a seed."
+    assert cue.start_time == 0.0
+    assert cue.end_time == 3.0
+
+
+def test_subtitle_cue_preserves_timing() -> None:
+    cue = SubtitleCue(text="hello", start_time=1.5, end_time=4.25)
+    assert cue.start_time == 1.5
+    assert cue.end_time == 4.25
+
+
+# --- Timeline with voice_track and subtitles ---
+
+def test_timeline_voice_track_defaults_none() -> None:
+    tl = Timeline(story=_make_story(), scenes=[], duration=0.0)
+    assert tl.voice_track is None
+
+
+def test_timeline_subtitles_defaults_empty() -> None:
+    tl = Timeline(story=_make_story(), scenes=[], duration=0.0)
+    assert tl.subtitles == []
+
+
+def test_timeline_accepts_voice_track() -> None:
+    vt = VoiceTrack(audio=b"audio", sample_rate=24000, duration=10.0)
+    tl = Timeline(story=_make_story(), scenes=[], duration=10.0, voice_track=vt)
+    assert tl.voice_track is not None
+    assert tl.voice_track.sample_rate == 24000
+
+
+def test_timeline_accepts_subtitles() -> None:
+    cues = [
+        SubtitleCue(text="First line.", start_time=0.0, end_time=2.0),
+        SubtitleCue(text="Second line.", start_time=2.0, end_time=5.0),
+    ]
+    tl = Timeline(story=_make_story(), scenes=[], duration=5.0, subtitles=cues)
+    assert len(tl.subtitles) == 2
+    assert tl.subtitles[0].text == "First line."
+
+
+def test_timeline_existing_fields_unchanged() -> None:
+    vt = VoiceTrack(audio=b"x", sample_rate=24000, duration=5.0)
+    cues = [SubtitleCue(text="hi", start_time=0.0, end_time=1.0)]
+    tl = Timeline(story=_make_story(), scenes=[], duration=5.0, voice_track=vt, subtitles=cues)
+    assert tl.duration == 5.0
+    assert tl.story.title == "The Seed"
