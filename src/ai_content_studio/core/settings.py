@@ -17,3 +17,5 @@ class Settings(BaseSettings):
     freepik_api_key: str | None = None
     pexels_api_key: str | None = None
     pixabay_api_key: str | None = None
+    kokoro_voice: str = "af_heart"
+    kokoro_speed: float = 1.0
