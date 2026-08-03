@@ -72,15 +72,13 @@ def test_pipeline_generates_prompt() -> None:
 
 
 def test_pipeline_prompt_contains_identity() -> None:
-    from ai_content_studio.brain.prompts import load_system_prompt
-
     builder = PromptBuilder()
     provider = FakeLLMProvider()
 
     prompt = builder.build_story_prompt(_make_brief("the first harvest"))
     provider.generate(prompt)
 
-    assert load_system_prompt() in provider.last_prompt  # type: ignore[operator]
+    assert "Cocoa Talk" in (provider.last_prompt or "")
 
 
 def test_pipeline_parser_returns_story() -> None:

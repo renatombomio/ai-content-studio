@@ -1,0 +1,63 @@
+{
+  "id": "b96a2634-ae92-4393-ba4f-d44ff05b90f0",
+  "title": "Antes de aprender a esconderte",
+  "hook": "Hab\u00eda una foto tuya de cuando ten\u00edas ocho a\u00f1os en la que te re\u00edas sin taparse la boca.",
+  "caption": "En alg\u00fan punto dejaste de ser t\u00fa para caberle al mundo. Esa persona sigue ah\u00ed.",
+  "hashtags": [
+    "#cortometraje",
+    "#historiasbrevesqueduelen",
+    "#cocoatalk",
+    "#identidad",
+    "#peliculascortas"
+  ],
+  "scenes": [
+    {
+      "id": "cd4bb093-0f82-4c6c-98a3-eb5f2c340992",
+      "order": 1,
+      "narration": "Hab\u00eda una foto tuya de cuando ten\u00edas ocho a\u00f1os en la que te re\u00edas sin taparse la boca. Sin pensar en c\u00f3mo sonaba. Sin mirar alrededor.",
+      "visual_prompt": "Una foto impresa, desgastada por los bordes, sobre una mesa de madera rayada. Luz de tarde que entra oblicua por una ventana fuera de cuadro. La imagen muestra a una ni\u00f1a riendo, boca abierta, ojos cerrados. La c\u00e1mara se acerca despacio hasta que la foto ocupa todo el encuadre.",
+      "emotion": "nostalgia",
+      "duration_seconds": 8.0
+    },
+    {
+      "id": "782f81e3-c3cb-4576-80ec-f4caa1cca4d1",
+      "order": 2,
+      "narration": "No recuerdas exactamente cu\u00e1ndo empezaste a hacerte m\u00e1s peque\u00f1a. Fue poco a poco. Tan poco que casi no doli\u00f3.",
+      "visual_prompt": "Una persona adulta joven sentada en el borde de una cama sin tender. Espalda hacia la c\u00e1mara. Hombros ligeramente ca\u00eddos. La habitaci\u00f3n est\u00e1 en penumbra, solo una l\u00e1mpara encendida en el rinc\u00f3n. Sin movimiento. La c\u00e1mara no se mueve.",
+      "emotion": "melancholy",
+      "duration_seconds": 7.0
+    },
+    {
+      "id": "d77bc6c0-971d-48b5-9488-2595fc1df99b",
+      "order": 3,
+      "narration": "Aprendiste a re\u00edrte menos fuerte. A opinar con cuidado. A entrar a los cuartos como si pidieras permiso de estar.",
+      "visual_prompt": "Plano detalle de unas manos que sostienen una taza de caf\u00e9 ya fr\u00eda. Los dedos la rodean pero no aprietan. Sobre una mesa de cafeter\u00eda con ruido de fondo apenas audible. La c\u00e1mara no corta, solo observa.",
+      "emotion": "inner_conflict",
+      "duration_seconds": 9.0
+    },
+    {
+      "id": "752ae26e-054b-4908-a459-94e0e57d0c1b",
+      "order": 4,
+      "narration": "Un d\u00eda encuentras algo. Una canci\u00f3n que escuchabas a los doce. Una palabra que escribiste en un cuaderno viejo.",
+      "visual_prompt": "Un cuaderno de espiral abierto sobre una superficie clara. Letra infantil, p\u00e1ginas amarillas. La mano entra al cuadro y pasa una p\u00e1gina despacio. Luz natural cenital, suave. Sin m\u00fasica extradieg\u00e9tica, solo el sonido del papel.",
+      "emotion": "self_discovery",
+      "duration_seconds": 8.0
+    },
+    {
+      "id": "ea714b55-7d66-40cd-855a-57acc9af6503",
+      "order": 5,
+      "narration": "Y por un segundo \u2014solo un segundo\u2014 te reconoces.",
+      "visual_prompt": "Un espejo peque\u00f1o, con el marco descascarado, colgado en una pared de pintura vieja. El reflejo muestra una cara en silencio. Sin expresi\u00f3n definida. Los ojos sostienen la mirada sin bajarla. La c\u00e1mara est\u00e1 ligeramente fuera de eje, como si observara sin querer ser notada.",
+      "emotion": "self_discovery",
+      "duration_seconds": 6.0
+    },
+    {
+      "id": "75899cc5-8ae4-4240-81e1-9cb97632c636",
+      "order": 6,
+      "narration": "No se trata de volverte otra persona. Se trata de volver.",
+      "visual_prompt": "La misma foto del principio, ahora en la mano de alguien. Los dedos la sostienen con cuidado. La c\u00e1mara se aleja muy despacio hasta que la mano y la foto se vuelven peque\u00f1as en el encuadre. La luz de la ventana sigue igual. Fundido lento a negro.",
+      "emotion": "acceptance",
+      "duration_seconds": 10.0
+    }
+  ]
+}

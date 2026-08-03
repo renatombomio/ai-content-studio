@@ -13,6 +13,7 @@ from ai_content_studio.brain.prompt_builder import PromptBuilder
 from ai_content_studio.brain.providers.anthropic import AnthropicProvider
 from ai_content_studio.brain.service import BrainService
 from ai_content_studio.brain.story_director import StoryDirector
+from ai_content_studio.brands.brand_context import BrandContext
 from ai_content_studio.core.config import get_settings
 from ai_content_studio.core.exceptions import ProviderError
 
@@ -37,7 +38,7 @@ def main() -> None:
 
     service = BrainService(
         story_director=StoryDirector(),
-        prompt_builder=PromptBuilder(),
+        prompt_builder=PromptBuilder(brand_context=BrandContext.load()),
         llm_provider=AnthropicProvider(),
         story_parser=StoryParser(),
     )
