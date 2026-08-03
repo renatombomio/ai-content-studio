@@ -28,7 +28,8 @@ It is not a generic content platform. Every design decision serves one goal: pub
 |--------|-------|--------|
 | Sprint 1 | Core infrastructure, Cocoa Talk identity, shared domain models | ✅ Completed |
 | Sprint 2 | Brain pipeline — StoryDirector, PromptBuilder, AnthropicProvider, StoryParser, AssetProvider interface | ✅ Completed |
-| Sprint 3 | Asset Engine — search, providers, ranking, service, scene → asset resolution | 🔄 Active |
+| Sprint 3 | Asset Engine — SearchQueryBuilder, FreepikProvider, PexelsProvider, PixabayProvider, AssetRanker, AssetService | ✅ Completed |
+| Sprint 4 | Video Engine — Timeline, Voice, Subtitles, FFmpeg Renderer | 🔄 Active |
 
 ---
 
@@ -100,43 +101,43 @@ It is not a generic content platform. Every design decision serves one goal: pub
 
 ---
 
-### Phase 4 — Asset Engine 🔄 Sprint 3
+### Phase 4 — Asset Engine ✅
 
-**Goal:** Source every visual and audio asset required by the production plan.
+**Goal:** Source every visual asset required by the production plan.
 
-**Priority order:**
-1. Local library (previously downloaded or curated assets)
-2. Freepik
-3. Mixkit
-4. Pexels
-5. Pixabay
-6. AI generation — only when no suitable asset exists in the above sources
+**Providers (searched in parallel, ranked by score):**
+1. Freepik (Magnific API)
+2. Pexels
+3. Pixabay
 
 **Deliverables:**
-- Asset resolver: selects the best source per scene
-- Downloaders per source with rate-limit and error handling
-- Local asset cache
-- AI generation fallback (image and short video clip)
-- Asset manifest attached to the production plan
+- SearchQueryBuilder — derives a visual search query from a Scene
+- AssetProvider interface — common contract for all providers
+- FreepikProvider — Freepik image and vector search via Magnific API
+- PexelsProvider — Pexels photo and video search
+- PixabayProvider — Pixabay image and video search
+- AssetRanker — scores assets by orientation, type, resolution, duration, and emotion
+- AssetService — orchestrates providers, merges results, deduplicates, ranks
 
-**Definition of Done:** Every scene in a production plan has at least one resolved, downloaded asset ready for editing.
+**Definition of Done:** Given a Scene, the Asset Engine returns a ranked, deduplicated list of assets from all available providers.
 
 **Sprint 3 Tasks:**
 
 | Task | Description | Status |
 |------|-------------|--------|
-| S3-001 | Search Query Builder | ⬜ Pending |
-| S3-002 | Freepik Provider | ⬜ Pending |
-| S3-003 | Mixkit Provider | ⬜ Pending |
-| S3-004 | Pexels Provider | ⬜ Pending |
-| S3-005 | Asset Ranking | ⬜ Pending |
-| S3-006 | Asset Service | ⬜ Pending |
-| S3-007 | Scene → Assets | ⬜ Pending |
-| S3-008 | End-to-End Asset Pipeline | ⬜ Pending |
+| S3-001 | Search Query Builder | ✅ Completed |
+| S3-002 | API Research & Provider Contract | ✅ Completed |
+| S3-003 | Asset Domain Model Revision | ✅ Completed |
+| S3-004 | FreepikProvider | ✅ Completed |
+| S3-005 | PexelsProvider | ✅ Completed |
+| S3-006 | AssetRanker | ✅ Completed |
+| S3-007 | AssetService | ✅ Completed |
+| S3-008 | PixabayProvider | ✅ Completed |
+| S3-009 | End-to-End Asset Pipeline | ✅ Completed |
 
 ---
 
-### Phase 5 — Video Engine
+### Phase 5 — Video Engine 🔄 Sprint 4
 
 **Goal:** Assemble all assets into a finished, ready-to-upload TikTok video.
 
@@ -150,6 +151,18 @@ It is not a generic content platform. Every design decision serves one goal: pub
 
 **Definition of Done:** Given a production plan with resolved assets, the engine renders a single `.mp4` file ready for publishing.
 
+**Sprint 4 Tasks:**
+
+| Task | Description | Status |
+|------|-------------|--------|
+| S4-001 | Timeline Domain | ⬜ Pending |
+| S4-002 | Timeline Builder | ⬜ Pending |
+| S4-003 | Voice Engine (TTS) | ⬜ Pending |
+| S4-004 | Subtitle Generator | ⬜ Pending |
+| S4-005 | FFmpeg Renderer | ⬜ Pending |
+| S4-006 | Render Service | ⬜ Pending |
+| S4-007 | End-to-End Render Pipeline | ⬜ Pending |
+
 ---
 
 ### Phase 6 — Publisher
@@ -157,11 +170,10 @@ It is not a generic content platform. Every design decision serves one goal: pub
 **Goal:** Upload the finished video to TikTok automatically.
 
 **Deliverables:**
-- Playwright-based browser automation
-- Persistent authenticated browser session
-- TikTok upload flow (file, caption, hashtags, cover frame)
-- Scheduling support (publish now or at a future time)
-- Post-publish confirmation and URL capture
+- TikTok Publisher
+- Instagram Publisher
+- Upload Service
+- Publication Pipeline
 
 **Definition of Done:** The Publisher uploads a video to TikTok unattended, confirms the post is live, and stores the published URL.
 
@@ -172,9 +184,11 @@ It is not a generic content platform. Every design decision serves one goal: pub
 **Goal:** The Studio operates weekly without manual triggering.
 
 **Deliverables:**
-- Weekly scheduler — triggers the full pipeline twice per week
-- Automatic recovery — retries failed stages with backoff
-- Notifications — alerts on success, failure, or human approval requests
+- Scheduler
+- Content Calendar
+- Retry System
+- Monitoring
+- Analytics
 
 **Definition of Done:** The Studio autonomously publishes two high-quality TikTok videos every week. Failures are recovered or escalated without human initiation.
 

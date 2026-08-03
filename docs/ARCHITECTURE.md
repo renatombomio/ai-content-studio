@@ -7,13 +7,13 @@
 ```
 Idea
  ↓
-Brain          →  Structured Story
+Brain Engine    →  Structured Story
  ↓
-Asset Engine   →  Resolved Assets
+Asset Engine    →  Resolved Assets
  ↓
-Video Engine   →  TikTok-ready MP4
+Video Engine    →  TikTok-ready MP4
  ↓
-Publisher      →  Live TikTok Post
+Publisher       →  Live TikTok Post
 ```
 
 Each stage consumes the output of the previous one. No stage reaches backward or sideways into another stage's internals.
@@ -50,6 +50,13 @@ The creative engine. The Brain transforms a topic or idea into a complete, struc
 - Generate captions per scene
 - Generate a curated TikTok hashtag set
 
+**Components:**
+- `StoryDirector` — orchestrates the full Brain pipeline
+- `PromptBuilder` — constructs LLM prompts from a CreativeBrief
+- `AnthropicProvider` — LLM backend (Claude)
+- `StoryParser` — parses and validates LLM output into a StructuredStory
+- `BrainService` — public interface for the Brain module
+
 **Output:** A single Structured Story object — a validated, machine-readable production plan consumed by downstream stages.
 
 **Boundaries:** The Brain generates text and structure only. It never downloads assets, edits video, or publishes content.
@@ -58,16 +65,24 @@ The creative engine. The Brain transforms a topic or idea into a complete, struc
 
 ### Asset Engine
 
-The resource resolver. The Asset Engine takes a Structured Story and finds the best visual and audio assets for every scene.
+The resource resolver. The Asset Engine takes a Structured Story and finds the best visual assets for every scene.
 
 **Responsibilities:**
-- Search the local asset library first
-- Search external sources in priority order: Freepik → Mixkit → Pexels → Pixabay
-- Fall back to AI generation only when no suitable asset is found elsewhere
-- Download and cache resolved assets
-- Attach an asset manifest to the production plan
+- Derive a visual search query from each scene
+- Search all configured providers in parallel
+- Merge, deduplicate, and rank results by relevance
+- Return a ranked asset list per scene
 
-**Output:** The Structured Story enriched with resolved, downloaded assets for every scene.
+**Components:**
+- `SearchQueryBuilder` — derives a visual search query from a Scene
+- `AssetProvider` — abstract interface implemented by all providers
+- `FreepikProvider` — Freepik image and vector search (Magnific API)
+- `PexelsProvider` — Pexels photo and video search
+- `PixabayProvider` — Pixabay image and video search
+- `AssetRanker` — scores assets by orientation, type, resolution, duration, and emotion affinity
+- `AssetService` — orchestrates providers, merges results, deduplicates, ranks
+
+**Output:** Ranked, deduplicated list of Assets per Scene.
 
 **Boundaries:** The Asset Engine selects and retrieves media. It never edits video or publishes content.
 
@@ -79,11 +94,16 @@ The production suite. The Video Engine assembles assets and story structure into
 
 **Responsibilities:**
 - Build a scene timeline from the production plan
+- Generate narration audio via TTS
+- Generate subtitles from scene captions
 - Composite video clips, images, and overlays via FFmpeg
-- Burn in subtitles and captions with brand typography
-- Layer background music
-- Apply scene transitions consistent with brand style
 - Render and export a TikTok-compatible MP4 (9:16 aspect ratio)
+
+**Components:**
+- `Timeline` — domain model representing the timed sequence of clips
+- `TimelineBuilder` — constructs a Timeline from a Story and resolved assets
+- `VoiceEngine` — text-to-speech narration generation
+- `Renderer` — FFmpeg-based video assembly and export
 
 **Input:** Structured Story + resolved asset manifest.
 
@@ -104,6 +124,11 @@ The delivery layer. The Publisher handles the final step: getting the rendered v
 - Select or set the publish time (immediate or scheduled)
 - Confirm the post is live and capture the published URL
 
+**Components:**
+- `TikTokPublisher` — TikTok upload and confirmation
+- `InstagramPublisher` — Instagram upload and confirmation
+- Upload Service — shared upload orchestration
+
 **Boundaries:** The Publisher uploads and confirms. It never generates content, selects assets, or edits video.
 
 ---
@@ -118,6 +143,11 @@ The automation controller. The Scheduler owns the weekly production cadence and 
 - Retry failed stages with backoff
 - Escalate unrecoverable failures via notification
 - Log job history and outcomes
+
+**Components:**
+- `Scheduler` — triggers and monitors pipeline runs
+- `Calendar` — manages the publishing schedule
+- `Monitoring` — tracks job health and surfaces failures
 
 **Boundaries:** The Scheduler coordinates timing and recovery. It contains no content or media logic.
 
@@ -143,7 +173,7 @@ The persistence layer. Storage provides a consistent interface to all durable da
 The common vocabulary. Shared provides types, contracts, and utilities used across modules.
 
 **Responsibilities:**
-- Domain types and data models (e.g., `StructuredStory`, `Scene`, `Asset`)
+- Domain types and data models (e.g., `StructuredStory`, `Scene`, `Asset`, `Emotion`, `CreativeBrief`)
 - Interfaces and protocols that decouple modules from concrete implementations
 - Project-wide constants
 - Pure utility functions with no side effects

@@ -7,15 +7,21 @@
 ```
 Idea
  ↓
-Brain          →  Structured Story
+Brain Engine
  ↓
-Asset Engine   →  Story + Selected Assets
+Story
  ↓
-Video Engine   →  Rendered MP4
+Asset Engine
  ↓
-Publisher      →  Published TikTok Post
- ↑
-Scheduler      →  Triggers Publisher on schedule
+Timeline Builder
+ ↓
+Timeline
+ ↓
+Voice Engine
+ ↓
+Rendered Video
+ ↓
+TikTok Publisher
 ```
 
 ---
@@ -26,8 +32,8 @@ Scheduler      →  Triggers Publisher on schedule
 |-------|--------|--------|
 | Idea / Brief | Brain — StoryDirector | ✅ Sprint 2 |
 | Brain | Brain — PromptBuilder, AnthropicProvider, StoryParser | ✅ Sprint 2 |
-| Asset Engine | assets — AssetProvider interface | 🔄 Sprint 3 |
-| Video Engine | video | ⬜ Planned |
+| Asset Engine | assets — SearchQueryBuilder, providers, AssetRanker, AssetService | ✅ Sprint 3 |
+| Video Engine | video — Timeline, VoiceEngine, Renderer | 🔄 Sprint 4 |
 | Publisher | publisher | ⬜ Planned |
 | Scheduler | scheduler | ⬜ Planned |
 
@@ -51,7 +57,7 @@ Scheduler      →  Triggers Publisher on schedule
 
 ---
 
-### 2. Brain
+### 2. Brain Engine
 
 **Purpose:** Transform the Creative Brief into a complete, machine-readable production plan.
 
@@ -72,49 +78,77 @@ Scheduler      →  Triggers Publisher on schedule
 
 ### 3. Asset Engine
 
-**Purpose:** Resolve the best visual and audio asset for every scene in the Structured Story.
+**Purpose:** Resolve the best visual asset for every scene in the Structured Story.
 
-**Input:** Structured Story
+**Input:** Structured Story (list of Scenes)
 
-**Output:** Structured Story with an asset manifest — each scene has at least one resolved, downloaded asset attached.
+**Output:** Ranked, deduplicated list of Assets per Scene.
 
-**Search priority:**
-1. Local Library
-2. Freepik
-3. Mixkit
-4. Pexels
-5. Pixabay
-6. AI Generation — only when no suitable asset is found in any of the above
+**Internal flow:**
+
+```
+Scene
+ ↓
+SearchQueryBuilder
+ ↓
+Freepik
+Pexels
+Pixabay
+ ↓
+AssetRanker
+ ↓
+Assets
+```
 
 **Responsible Module:** Asset Engine
 
-**Failure Handling:** If a source is unavailable, the engine falls through to the next source in priority order. If all sources fail for a scene, AI generation is attempted. If AI generation also fails, the pipeline stops and the failure is reported.
+**Failure Handling:** If a provider is unavailable, the engine continues with the remaining providers. If all providers fail for a scene, AssetError is raised and the pipeline stops.
 
 ---
 
-### 4. Video Engine
+### 4. Timeline Builder
 
-**Purpose:** Assemble the Structured Story and its assets into a finished, cinematic vertical video.
+**Purpose:** Map scenes, assets, narration, and captions to a time-coded timeline.
 
-**Input:** Structured Story + asset manifest
+**Input:** Structured Story + resolved assets per scene.
 
-**Output:** Rendered MP4 — a single TikTok-compatible video file (9:16 aspect ratio) with subtitles, music, and transitions applied.
-
-**Responsibilities:**
-- Build the scene timeline
-- Composite video clips and images
-- Burn in subtitles and captions
-- Layer background music
-- Apply brand-consistent transitions
-- Export the final render
+**Output:** Timeline — an ordered sequence of timed clips ready for rendering.
 
 **Responsible Module:** Video Engine
+
+**Failure Handling:** Invalid or incomplete input stops the builder. No partial timelines are produced.
+
+---
+
+### 5. Voice Engine
+
+**Purpose:** Generate narration audio for each scene using text-to-speech.
+
+**Input:** Scene narration text.
+
+**Output:** Audio file per scene, attached to the timeline.
+
+**Responsible Module:** Video Engine
+
+**Failure Handling:** TTS failures stop the pipeline. The rendered audio is discarded and the error is surfaced.
+
+---
+
+### 6. Rendered Video
+
+**Purpose:** Assemble the timeline, assets, audio, and captions into a finished video.
+
+**Input:** Timeline + audio files + caption text.
+
+**Output:** Rendered MP4 — a single TikTok-compatible video file (9:16 aspect ratio) with subtitles and transitions applied.
+
+**Responsible Module:** Video Engine (FFmpeg Renderer)
 
 **Failure Handling:** Rendering errors stop the pipeline immediately. The failed render is discarded. The Scheduler is notified and may retry the full pipeline or escalate to the operator.
 
 ---
 
-### 5. Publisher
+### 7. TikTok Publisher
 
 **Purpose:** Upload the rendered video to TikTok and confirm the post is live.
 
@@ -132,27 +166,6 @@ Scheduler      →  Triggers Publisher on schedule
 **Responsible Module:** Publisher
 
 **Failure Handling:** If the upload fails, the Publisher retries up to a configured limit before surfacing the failure to the Scheduler. The rendered MP4 is preserved so the upload can be retried without re-rendering.
-
----
-
-### 6. Scheduler
-
-**Purpose:** Determine when the pipeline runs and manage the job lifecycle.
-
-**Input:** Publishing schedule (days, times, cadence)
-
-**Output:** Publishing job — a triggered pipeline execution at the configured time.
-
-**Responsibilities:**
-- Trigger a full pipeline run twice per week
-- Monitor job progress
-- Retry failed jobs with backoff
-- Notify the operator on unrecoverable failures
-- Record job history and outcomes
-
-**Responsible Module:** Scheduler
-
-**Failure Handling:** Failed jobs are retried automatically. If a job cannot complete after all retries, the Scheduler notifies the operator and skips to the next scheduled run rather than blocking future executions.
 
 ---
 
