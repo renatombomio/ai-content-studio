@@ -5,7 +5,8 @@ import json
 from ai_content_studio.brain.parser import StoryParser
 from ai_content_studio.brain.prompt_builder import PromptBuilder
 from ai_content_studio.brain.providers import LLMProvider
-from ai_content_studio.shared.models import Scene, Story
+from ai_content_studio.shared.models import CreativeBrief, Scene, Story
+from ai_content_studio.shared.models.emotion import Emotion
 
 _FAKE_STORY = {
     "title": "The Last Harvest",
@@ -38,6 +39,16 @@ _FAKE_STORY = {
 }
 
 
+def _make_brief(idea: str = "cocoa origin") -> CreativeBrief:
+    return CreativeBrief(
+        idea=idea,
+        primary_emotion=Emotion.NOSTALGIA,
+        theme="origin and legacy",
+        narrative_arc="four-phase arc",
+        target_duration_seconds=60,
+    )
+
+
 class FakeLLMProvider(LLMProvider):
     """Returns a fixed valid Story JSON regardless of prompt input."""
 
@@ -53,7 +64,7 @@ def test_pipeline_generates_prompt() -> None:
     builder = PromptBuilder()
     provider = FakeLLMProvider()
 
-    prompt = builder.build_story_prompt("cocoa origin")
+    prompt = builder.build_story_prompt(_make_brief("cocoa origin"))
     provider.generate(prompt)
 
     assert provider.last_prompt is not None
@@ -66,7 +77,7 @@ def test_pipeline_prompt_contains_identity() -> None:
     builder = PromptBuilder()
     provider = FakeLLMProvider()
 
-    prompt = builder.build_story_prompt("the first harvest")
+    prompt = builder.build_story_prompt(_make_brief("the first harvest"))
     provider.generate(prompt)
 
     assert load_system_prompt() in provider.last_prompt  # type: ignore[operator]
@@ -77,7 +88,7 @@ def test_pipeline_parser_returns_story() -> None:
     provider = FakeLLMProvider()
     parser = StoryParser()
 
-    prompt = builder.build_story_prompt("the first harvest")
+    prompt = builder.build_story_prompt(_make_brief("the first harvest"))
     response = provider.generate(prompt)
     story = parser.parse(response)
 
@@ -89,7 +100,7 @@ def test_pipeline_story_has_expected_title() -> None:
     provider = FakeLLMProvider()
     parser = StoryParser()
 
-    prompt = builder.build_story_prompt("the first harvest")
+    prompt = builder.build_story_prompt(_make_brief("the first harvest"))
     story = parser.parse(provider.generate(prompt))
 
     assert story.title == "The Last Harvest"
@@ -100,7 +111,7 @@ def test_pipeline_story_has_expected_scenes() -> None:
     provider = FakeLLMProvider()
     parser = StoryParser()
 
-    prompt = builder.build_story_prompt("the first harvest")
+    prompt = builder.build_story_prompt(_make_brief("the first harvest"))
     story = parser.parse(provider.generate(prompt))
 
     assert len(story.scenes) == 3
@@ -117,7 +128,7 @@ def test_pipeline_is_end_to_end() -> None:
     provider = FakeLLMProvider()
     parser = StoryParser()
 
-    story = parser.parse(provider.generate(builder.build_story_prompt(idea)))
+    story = parser.parse(provider.generate(builder.build_story_prompt(_make_brief(idea))))
 
     assert isinstance(story, Story)
     assert story.hook

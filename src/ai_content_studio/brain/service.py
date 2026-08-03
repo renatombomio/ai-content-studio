@@ -25,6 +25,6 @@ class BrainService:
     def generate_story(self, idea: str) -> Story:
         """Generate a Story from an idea by running the full Brain pipeline."""
         brief = self._story_director.direct(idea)
-        prompt = self._prompt_builder.build_story_prompt(brief.idea)
+        prompt = self._prompt_builder.build_story_prompt(brief)
         response = self._llm_provider.generate(prompt)
         return self._story_parser.parse(response)

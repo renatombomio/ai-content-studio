@@ -73,4 +73,4 @@ def test_provider_uses_model_from_settings() -> None:
         provider.generate("prompt")
 
         call_kwargs = mock_client.messages.create.call_args
-        assert "claude-sonnet-4" in str(call_kwargs)
+        assert "claude-sonnet-4-5" in str(call_kwargs)
