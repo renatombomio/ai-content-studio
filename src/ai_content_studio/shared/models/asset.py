@@ -11,5 +11,13 @@ class Asset(BaseModel):
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     scene_id: str
     source: str
-    path: str
+    provider_id: str
     asset_type: str
+    url: str
+    thumbnail_url: str
+    width: int | None = None
+    height: int | None = None
+    duration: float | None = None
+    author: str | None = None
+    license: str | None = None
+    path: str | None = None

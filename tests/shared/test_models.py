@@ -81,22 +81,90 @@ def test_story_model_dump_includes_scenes() -> None:
 
 # --- Asset ---
 
+def _make_asset(**kwargs: object) -> Asset:
+    defaults: dict[str, object] = {
+        "scene_id": "scene-1",
+        "source": "pexels",
+        "provider_id": "1448735",
+        "asset_type": "video",
+        "url": "https://player.vimeo.com/external/example.mp4",
+        "thumbnail_url": "https://images.pexels.com/videos/1448735/preview.jpg",
+    }
+    defaults.update(kwargs)
+    return Asset(**defaults)  # type: ignore[arg-type]
+
+
 def test_asset_creation() -> None:
-    asset = Asset(scene_id="abc", source="pexels", path="/tmp/clip.mp4", asset_type="video")
+    asset = _make_asset()
     assert asset.source == "pexels"
     assert asset.asset_type == "video"
+    assert asset.provider_id == "1448735"
 
 
 def test_asset_id_auto_generated() -> None:
-    a1 = Asset(scene_id="x", source="local", path="/a", asset_type="image")
-    a2 = Asset(scene_id="x", source="local", path="/a", asset_type="image")
+    a1 = _make_asset()
+    a2 = _make_asset()
     assert a1.id != a2.id
 
 
 def test_asset_model_dump() -> None:
-    asset = Asset(scene_id="abc", source="mixkit", path="/tmp/a.mp4", asset_type="video")
+    asset = _make_asset(source="pixabay")
     data = asset.model_dump()
-    assert data["source"] == "mixkit"
+    assert data["source"] == "pixabay"
+    assert data["provider_id"] == "1448735"
+    assert data["url"] is not None
+    assert data["thumbnail_url"] is not None
+
+
+def test_asset_optional_fields_default_none() -> None:
+    asset = _make_asset()
+    assert asset.width is None
+    assert asset.height is None
+    assert asset.duration is None
+    assert asset.author is None
+    assert asset.license is None
+    assert asset.path is None
+
+
+def test_asset_optional_fields_accepted() -> None:
+    asset = _make_asset(
+        width=1920,
+        height=1080,
+        duration=37.0,
+        author="Jane Doe",
+        license="Pexels License",
+        path="/tmp/clip.mp4",
+    )
+    assert asset.width == 1920
+    assert asset.height == 1080
+    assert asset.duration == 37.0
+    assert asset.author == "Jane Doe"
+    assert asset.license == "Pexels License"
+    assert asset.path == "/tmp/clip.mp4"
+
+
+def test_asset_path_none_before_download() -> None:
+    asset = _make_asset()
+    assert asset.path is None
+
+
+def test_asset_path_set_after_download() -> None:
+    asset = _make_asset(path="/data/assets/clip.mp4")
+    assert asset.path == "/data/assets/clip.mp4"
+
+
+def test_asset_model_dump_includes_all_fields() -> None:
+    asset = _make_asset(width=1280, height=720, duration=15.5, author="Photographer", license="Free")
+    data = asset.model_dump()
+    for field in ("id", "scene_id", "source", "provider_id", "asset_type", "url",
+                  "thumbnail_url", "width", "height", "duration", "author", "license", "path"):
+        assert field in data
+
+
+def test_asset_scene_id_stored() -> None:
+    scene = _make_scene()
+    asset = _make_asset(scene_id=scene.id)
+    assert asset.scene_id == scene.id
 
 
 # --- Publication ---
