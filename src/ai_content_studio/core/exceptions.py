@@ -25,6 +25,10 @@ class VideoError(AppError):
     """Raised when video assembly or rendering fails."""
 
 
+class RendererError(VideoError):
+    """Raised when FFmpeg rendering fails."""
+
+
 class PublisherError(AppError):
     """Raised when publishing to TikTok fails."""
 
