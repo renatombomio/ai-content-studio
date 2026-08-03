@@ -22,6 +22,16 @@ It is not a generic content platform. Every design decision serves one goal: pub
 
 ---
 
+## Sprint Status
+
+| Sprint | Scope | Status |
+|--------|-------|--------|
+| Sprint 1 | Core infrastructure, Cocoa Talk identity, shared domain models | ✅ Completed |
+| Sprint 2 | Brain pipeline — StoryDirector, PromptBuilder, AnthropicProvider, StoryParser, AssetProvider interface | ✅ Completed |
+| Sprint 3 | Asset Engine — search, providers, ranking, service, scene → asset resolution | 🔄 Active |
+
+---
+
 ## Product Phases
 
 ---
@@ -73,7 +83,7 @@ It is not a generic content platform. Every design decision serves one goal: pub
 
 ---
 
-### Phase 3 — Brain
+### Phase 3 — Brain ✅
 
 **Goal:** Automate ideation, scripting, and scene planning using an LLM.
 
@@ -90,7 +100,7 @@ It is not a generic content platform. Every design decision serves one goal: pub
 
 ---
 
-### Phase 4 — Asset Engine
+### Phase 4 — Asset Engine 🔄 Sprint 3
 
 **Goal:** Source every visual and audio asset required by the production plan.
 
@@ -110,6 +120,19 @@ It is not a generic content platform. Every design decision serves one goal: pub
 - Asset manifest attached to the production plan
 
 **Definition of Done:** Every scene in a production plan has at least one resolved, downloaded asset ready for editing.
+
+**Sprint 3 Tasks:**
+
+| Task | Description | Status |
+|------|-------------|--------|
+| S3-001 | Search Query Builder | ⬜ Pending |
+| S3-002 | Freepik Provider | ⬜ Pending |
+| S3-003 | Mixkit Provider | ⬜ Pending |
+| S3-004 | Pexels Provider | ⬜ Pending |
+| S3-005 | Asset Ranking | ⬜ Pending |
+| S3-006 | Asset Service | ⬜ Pending |
+| S3-007 | Scene → Assets | ⬜ Pending |
+| S3-008 | End-to-End Asset Pipeline | ⬜ Pending |
 
 ---
 

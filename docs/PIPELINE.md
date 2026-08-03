@@ -20,6 +20,19 @@ Scheduler      →  Triggers Publisher on schedule
 
 ---
 
+## Implementation Status
+
+| Stage | Module | Status |
+|-------|--------|--------|
+| Idea / Brief | Brain — StoryDirector | ✅ Sprint 2 |
+| Brain | Brain — PromptBuilder, AnthropicProvider, StoryParser | ✅ Sprint 2 |
+| Asset Engine | assets — AssetProvider interface | 🔄 Sprint 3 |
+| Video Engine | video | ⬜ Planned |
+| Publisher | publisher | ⬜ Planned |
+| Scheduler | scheduler | ⬜ Planned |
+
+---
+
 ## Stages
 
 ---
