@@ -4,6 +4,7 @@ from unittest.mock import MagicMock, patch
 
 import anthropic as anthropic_sdk
 import pytest
+from anthropic.types import TextBlock
 
 from ai_content_studio.brain.providers.anthropic import AnthropicProvider
 from ai_content_studio.core.exceptions import ProviderError
@@ -15,10 +16,8 @@ def _make_provider() -> AnthropicProvider:
 
 
 def _mock_response(text: str) -> MagicMock:
-    content_block = MagicMock()
-    content_block.text = text
     response = MagicMock()
-    response.content = [content_block]
+    response.content = [TextBlock(type="text", text=text)]
     return response
 
 

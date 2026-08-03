@@ -1,6 +1,7 @@
 """Anthropic LLM provider implementation."""
 
 import anthropic as anthropic_sdk
+from anthropic.types import TextBlock
 
 from ai_content_studio.brain.providers.base import LLMProvider
 from ai_content_studio.core.config import get_settings
@@ -23,6 +24,9 @@ class AnthropicProvider(LLMProvider):
                 max_tokens=4096,
                 messages=[{"role": "user", "content": prompt}],
             )
-            return str(message.content[0].text)  # type: ignore[union-attr]
+            for block in message.content:
+                if isinstance(block, TextBlock):
+                    return block.text
+            raise ProviderError("Anthropic returned no text block in response")
         except anthropic_sdk.APIError as exc:
             raise ProviderError(f"Anthropic API error: {exc}") from exc

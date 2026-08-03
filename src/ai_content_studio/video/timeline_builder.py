@@ -31,6 +31,7 @@ class TimelineBuilder:
 
 
 def _scene_duration(scene: Scene) -> float:
+    if scene.duration_seconds > 0:
+        return scene.duration_seconds
     word_count = len(scene.narration.split())
-    duration = max(word_count * 0.4, _MIN_SCENE_DURATION)
-    return round(duration, 4)
+    return round(max(word_count * 0.4, _MIN_SCENE_DURATION), 4)

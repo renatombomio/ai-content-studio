@@ -165,8 +165,14 @@ def test_minimum_scene_duration() -> None:
 
 
 def test_longer_narration_produces_longer_duration() -> None:
-    short = _make_scene(1, narration="Hello.")
-    long_ = _make_scene(1, narration=" ".join(["word"] * 50))
+    short = Scene(
+        order=1, narration="Hello.", visual_prompt="p.",
+        emotion=Emotion.HOPE, duration_seconds=0.0,
+    )
+    long_ = Scene(
+        order=1, narration=" ".join(["word"] * 50), visual_prompt="p.",
+        emotion=Emotion.HOPE, duration_seconds=0.0,
+    )
     tl_short = TimelineBuilder().build(_make_story(short), {})
     tl_long = TimelineBuilder().build(_make_story(long_), {})
     assert tl_long.duration > tl_short.duration

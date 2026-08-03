@@ -29,7 +29,8 @@ It is not a generic content platform. Every design decision serves one goal: pub
 | Sprint 1 | Core infrastructure, Cocoa Talk identity, shared domain models | ✅ Completed |
 | Sprint 2 | Brain pipeline — StoryDirector, PromptBuilder, AnthropicProvider, StoryParser, AssetProvider interface | ✅ Completed |
 | Sprint 3 | Asset Engine — SearchQueryBuilder, FreepikProvider, PexelsProvider, PixabayProvider, AssetRanker, AssetService | ✅ Completed |
-| Sprint 4 | Video Engine — Timeline, Voice, Subtitles, FFmpeg Renderer | 🔄 Active |
+| Sprint 4 | Video Engine — Timeline, Voice, Subtitles, FFmpeg Renderer | ✅ Completed |
+| Sprint 5 | Publisher — TikTok upload, Instagram upload, Upload Service | 🔄 Active |
 
 ---
 
@@ -137,7 +138,7 @@ It is not a generic content platform. Every design decision serves one goal: pub
 
 ---
 
-### Phase 5 — Video Engine 🔄 Sprint 4
+### Phase 5 — Video Engine ✅ Sprint 4
 
 **Goal:** Assemble all assets into a finished, ready-to-upload TikTok video.
 
@@ -155,13 +156,13 @@ It is not a generic content platform. Every design decision serves one goal: pub
 
 | Task | Description | Status |
 |------|-------------|--------|
-| S4-001 | Timeline Domain | ⬜ Pending |
-| S4-002 | Timeline Builder | ⬜ Pending |
-| S4-003 | Voice Engine (TTS) | ⬜ Pending |
-| S4-004 | Subtitle Generator | ⬜ Pending |
-| S4-005 | FFmpeg Renderer | ⬜ Pending |
-| S4-006 | Render Service | ⬜ Pending |
-| S4-007 | End-to-End Render Pipeline | ⬜ Pending |
+| S4-001 | Timeline Domain | ✅ Completed |
+| S4-002 | Timeline Builder | ✅ Completed |
+| S4-003 | Voice Engine (TTS) | ✅ Completed |
+| S4-004 | Subtitle Generator | ✅ Completed |
+| S4-005 | FFmpeg Renderer | ✅ Completed |
+| S4-006 | Render Service | ✅ Completed |
+| S4-007 | End-to-End Render Pipeline | ✅ Completed |
 
 ---
 

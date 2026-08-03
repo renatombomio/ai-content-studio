@@ -78,8 +78,8 @@ def _build_command(
     if audio_path is not None:
         cmd += ["-map", f"{n}:a", "-c:a", "aac", "-b:a", "192k"]
 
-    cmd += ["-c:v", "libx264", "-preset", "fast", "-crf", "23"]
-    cmd += ["-t", str(timeline.duration), str(output_path)]
+    cmd += ["-c:v", "libx264", "-preset", "fast", "-crf", "23", "-pix_fmt", "yuv420p"]
+    cmd += ["-movflags", "+faststart", "-t", str(timeline.duration), str(output_path)]
 
     return cmd
 
