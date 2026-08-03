@@ -2,6 +2,7 @@
 
 from ai_content_studio.assets.interface import AssetProvider
 from ai_content_studio.assets.providers.freepik import FreepikProvider
+from ai_content_studio.assets.providers.pexels import PexelsProvider
 from ai_content_studio.assets.query_builder import SearchQueryBuilder
 
-__all__ = ["AssetProvider", "FreepikProvider", "SearchQueryBuilder"]
+__all__ = ["AssetProvider", "FreepikProvider", "PexelsProvider", "SearchQueryBuilder"]
