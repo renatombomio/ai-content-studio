@@ -3,7 +3,9 @@
     "allow": [
       "Bash(git *)",
       "Bash(uv run *)",
-      "Bash(uv add *)"
+      "Bash(uv add *)",
+      "Bash(tree -L 4 -a /Users/renato/Desktop/ai-content-studio --ignore \".venv|__pycache__|.pytest_cache\")",
+      "Bash(grep -E \"\\\\.\\(py|md|toml|ini|json|yaml|yml\\)$\")"
     ]
   }
 }

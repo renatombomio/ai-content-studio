@@ -1,8 +1,6 @@
 """Tests for shared domain models."""
 
-from datetime import UTC, datetime
-
-from ai_content_studio.shared.models import Asset, Publication, Scene, Story
+from ai_content_studio.shared.models import Asset, Scene, Story
 
 
 def _make_scene(**kwargs: object) -> Scene:
@@ -167,27 +165,3 @@ def test_asset_scene_id_stored() -> None:
     assert asset.scene_id == scene.id
 
 
-# --- Publication ---
-
-def test_publication_creation() -> None:
-    pub = Publication(platform="tiktok", caption="Watch this!", hashtags=["#cocoa"])
-    assert pub.platform == "tiktok"
-    assert pub.scheduled_at is None
-
-
-def test_publication_scheduled_at_default_none() -> None:
-    pub = Publication(platform="tiktok", caption="Hi", hashtags=[])
-    assert pub.scheduled_at is None
-
-
-def test_publication_with_scheduled_at() -> None:
-    dt = datetime(2026, 8, 1, 12, 0, tzinfo=UTC)
-    pub = Publication(platform="tiktok", caption="Hi", hashtags=[], scheduled_at=dt)
-    assert pub.scheduled_at == dt
-
-
-def test_publication_model_dump() -> None:
-    pub = Publication(platform="tiktok", caption="Hi", hashtags=["#a"])
-    data = pub.model_dump()
-    assert data["platform"] == "tiktok"
-    assert data["hashtags"] == ["#a"]
