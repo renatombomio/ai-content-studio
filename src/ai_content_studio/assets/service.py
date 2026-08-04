@@ -2,6 +2,7 @@
 
 import logging
 
+from ai_content_studio.assets.concept_extractor import SceneConceptExtractor
 from ai_content_studio.assets.interface import AssetProvider
 from ai_content_studio.assets.query_builder import SearchQueryBuilder
 from ai_content_studio.assets.ranking import AssetRanker
@@ -12,21 +13,24 @@ logger = logging.getLogger(__name__)
 
 
 class AssetService:
-    """Orchestrates query building, provider calls, deduplication, and ranking."""
+    """Orchestrates concept extraction, query building, provider calls, and ranking."""
 
     def __init__(
         self,
         query_builder: SearchQueryBuilder,
+        concept_extractor: SceneConceptExtractor,
         providers: list[AssetProvider],
         ranker: AssetRanker,
     ) -> None:
         self._query_builder = query_builder
+        self._concept_extractor = concept_extractor
         self._providers = providers
         self._ranker = ranker
 
     def find_assets(self, scene: Scene, limit: int = 10) -> list[Asset]:
-        """Build a query, search all providers, deduplicate, rank, and return assets."""
-        query = self._query_builder.build(scene)
+        """Extract concept, build query, search providers, deduplicate, rank, return assets."""
+        concept = self._concept_extractor.extract(scene)
+        query = self._query_builder.build(concept)
 
         raw: list[Asset] = []
         failed = 0

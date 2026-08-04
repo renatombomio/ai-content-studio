@@ -2,18 +2,12 @@
 
 from ai_content_studio.assets.query_builder import SearchQueryBuilder
 from ai_content_studio.assets.visual_language import get_cinematic_terms
-from ai_content_studio.shared.models import Scene
 from ai_content_studio.shared.models.emotion import Emotion
+from ai_content_studio.shared.models.scene_concept import SceneConcept
 
 
-def _make_scene(narration: str = "", emotion: Emotion = Emotion.NOSTALGIA) -> Scene:
-    return Scene(
-        order=1,
-        narration=narration,
-        visual_prompt="placeholder",
-        emotion=emotion,
-        duration_seconds=5.0,
-    )
+def _make_concept(emotion: Emotion, concepts: list[str] | None = None) -> SceneConcept:
+    return SceneConcept(emotion=emotion, concepts=concepts or [])
 
 
 # --- emotional mapping ---
@@ -53,16 +47,14 @@ def test_mental_health_adjacent_emotions_have_calm_terms() -> None:
 
 def test_cinematic_terms_appear_in_query() -> None:
     builder = SearchQueryBuilder()
-    scene = _make_scene("She stood at the window.", Emotion.NOSTALGIA)
-    result = builder.build(scene)
+    result = builder.build(_make_concept(Emotion.NOSTALGIA))
     cinematic = get_cinematic_terms(Emotion.NOSTALGIA)
     assert any(term in result for term in cinematic)
 
 
 def test_query_is_richer_than_emotion_word_alone() -> None:
     builder = SearchQueryBuilder()
-    scene = _make_scene("", Emotion.LONELINESS)
-    result = builder.build(scene)
+    result = builder.build(_make_concept(Emotion.LONELINESS))
     assert len(result.split()) > 1
 
 
@@ -80,8 +72,8 @@ def test_cinematic_terms_are_deterministic() -> None:
 
 def test_query_is_deterministic_with_cinematic_enrichment() -> None:
     builder = SearchQueryBuilder()
-    scene = _make_scene("I sat alone by the river.", Emotion.LONGING)
-    assert builder.build(scene) == builder.build(scene)
+    concept = _make_concept(Emotion.LONGING, ["river", "road"])
+    assert builder.build(concept) == builder.build(concept)
 
 
 # --- multiple pillars (emotions from different editorial contexts) ---
@@ -90,7 +82,7 @@ def test_shadow_work_emotions_enriched() -> None:
     """Shadow Work pillar uses GRIEF, REGRET, INNER_CONFLICT."""
     builder = SearchQueryBuilder()
     for emotion in (Emotion.GRIEF, Emotion.REGRET, Emotion.INNER_CONFLICT):
-        result = builder.build(_make_scene(emotion=emotion))
+        result = builder.build(_make_concept(emotion))
         cinematic = get_cinematic_terms(emotion)
         assert any(term in result for term in cinematic)
 
@@ -99,7 +91,7 @@ def test_mental_health_emotions_enriched() -> None:
     """Mental Health pillar uses RELIEF, HOPE, ACCEPTANCE."""
     builder = SearchQueryBuilder()
     for emotion in (Emotion.RELIEF, Emotion.HOPE, Emotion.ACCEPTANCE):
-        result = builder.build(_make_scene(emotion=emotion))
+        result = builder.build(_make_concept(emotion))
         cinematic = get_cinematic_terms(emotion)
         assert any(term in result for term in cinematic)
 
@@ -108,6 +100,6 @@ def test_poetic_emotions_enriched() -> None:
     """Poetic Writing pillar uses NOSTALGIA, WONDER, LONGING."""
     builder = SearchQueryBuilder()
     for emotion in (Emotion.NOSTALGIA, Emotion.WONDER, Emotion.LONGING):
-        result = builder.build(_make_scene(emotion=emotion))
+        result = builder.build(_make_concept(emotion))
         cinematic = get_cinematic_terms(emotion)
         assert any(term in result for term in cinematic)

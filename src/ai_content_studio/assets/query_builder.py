@@ -1,29 +1,8 @@
-"""Search query builder — transforms a Scene into a visual search query."""
-
-import re
+"""Search query builder — assembles a visual search query from a SceneConcept."""
 
 from ai_content_studio.assets.visual_language import get_cinematic_terms
-from ai_content_studio.shared.models import Scene
 from ai_content_studio.shared.models.emotion import Emotion
-
-_STOP_WORDS: frozenset[str] = frozenset({
-    "a", "an", "the", "and", "or", "but", "so", "yet", "for", "nor",
-    "i", "me", "my", "we", "us", "our", "you", "your",
-    "he", "she", "it", "they", "them", "their", "his", "her", "its",
-    "is", "are", "was", "were", "be", "been", "being",
-    "have", "has", "had", "do", "does", "did",
-    "will", "would", "could", "should", "shall", "may", "might", "must", "can",
-    "in", "on", "at", "by", "with", "about", "from", "to", "of", "up",
-    "out", "as", "into", "through", "during", "before", "after",
-    "above", "below", "between",
-    "that", "which", "who", "whom", "whose",
-    "when", "where", "why", "how", "if", "while", "although", "because",
-    "since", "until", "unless",
-    "not", "no", "never", "always", "still", "just", "very", "really",
-    "ever", "also", "too", "then", "than",
-    "this", "these", "those", "what", "there", "here",
-    "kept", "came", "got", "went", "said", "made", "knew", "thought",
-})
+from ai_content_studio.shared.models.scene_concept import SceneConcept
 
 _EMOTION_VISUAL: dict[Emotion, str] = {
     Emotion.NOSTALGIA: "nostalgic",
@@ -42,33 +21,24 @@ _EMOTION_VISUAL: dict[Emotion, str] = {
     Emotion.SELF_DISCOVERY: "contemplative",
 }
 
-_FIRST_PERSON = re.compile(r"\b(i|we|me|us|my|our)\b", re.IGNORECASE)
-_NON_ALPHA = re.compile(r"[^a-zA-Z\s]")
-_MAX_KEYWORDS = 3
+_MAX_CONCEPTS = 3
 
 
 class SearchQueryBuilder:
-    """Transforms a Scene into a concise visual search query for asset providers."""
+    """Assembles a visual search query from a SceneConcept and cinematic visual language."""
 
-    def build(self, scene: Scene) -> str:
-        """Return a cinematic visual search query derived from scene narration and emotion."""
+    def build(self, concept: SceneConcept) -> str:
+        """Return a visual search query from semantic concepts and emotional atmosphere."""
         parts: list[str] = []
 
-        emotion_word = _EMOTION_VISUAL.get(scene.emotion)
+        emotion_word = _EMOTION_VISUAL.get(concept.emotion)
         if emotion_word:
             parts.append(emotion_word)
 
-        if scene.narration and _FIRST_PERSON.search(scene.narration):
-            parts.append("person")
+        parts.extend(concept.concepts[:_MAX_CONCEPTS])
+        parts.extend(get_cinematic_terms(concept.emotion))
 
-        parts.extend(_extract_keywords(scene.narration)[:_MAX_KEYWORDS])
-        parts.extend(get_cinematic_terms(scene.emotion))
+        if concept.visual_focus:
+            parts.append(concept.visual_focus)
 
         return " ".join(parts)
-
-
-def _extract_keywords(narration: str) -> list[str]:
-    if not narration:
-        return []
-    words = _NON_ALPHA.sub("", narration).lower().split()
-    return [w for w in words if w not in _STOP_WORDS]

@@ -4,6 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from ai_content_studio.assets.concept_extractor import SceneConceptExtractor
 from ai_content_studio.assets.interface import AssetProvider
 from ai_content_studio.assets.query_builder import SearchQueryBuilder
 from ai_content_studio.assets.ranking import AssetRanker
@@ -11,6 +12,7 @@ from ai_content_studio.assets.service import AssetService, _deduplicate
 from ai_content_studio.core.exceptions import AssetError
 from ai_content_studio.shared.models import Asset, Scene
 from ai_content_studio.shared.models.emotion import Emotion
+from ai_content_studio.shared.models.scene_concept import SceneConcept
 
 # --- Helpers ---
 
@@ -52,8 +54,12 @@ def _make_service(
     builder.build.return_value = query
     ranker = MagicMock(spec=AssetRanker)
     ranker.rank.side_effect = lambda scene, assets: assets
+    _stub_concept = SceneConcept(emotion=Emotion.HOPE, concepts=["field", "light"])
+    extractor = MagicMock(spec=SceneConceptExtractor)
+    extractor.extract.return_value = _stub_concept
     service = AssetService(
         query_builder=builder,
+        concept_extractor=extractor,
         providers=providers or [],
         ranker=ranker,
     )
@@ -68,11 +74,11 @@ def test_query_builder_called_once() -> None:
     builder.build.assert_called_once()
 
 
-def test_query_builder_receives_scene() -> None:
-    scene = _make_scene()
+def test_query_builder_receives_concept() -> None:
     service, builder, _ = _make_service(providers=[_make_provider()])
-    service.find_assets(scene)
-    builder.build.assert_called_once_with(scene)
+    service.find_assets(_make_scene())
+    args, _ = builder.build.call_args
+    assert isinstance(args[0], SceneConcept)
 
 
 # --- Provider calls ---

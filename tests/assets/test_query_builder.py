@@ -1,94 +1,115 @@
 """Tests for SearchQueryBuilder."""
 
 from ai_content_studio.assets.query_builder import SearchQueryBuilder
-from ai_content_studio.shared.models import Scene
+from ai_content_studio.assets.visual_language import get_cinematic_terms
 from ai_content_studio.shared.models.emotion import Emotion
+from ai_content_studio.shared.models.scene_concept import SceneConcept
 
 
-def _make_scene(
-    narration: str = "A man walks alone at dusk.",
+def _make_concept(
     emotion: Emotion = Emotion.LONELINESS,
-    order: int = 1,
-) -> Scene:
-    return Scene(
-        order=order,
-        narration=narration,
-        visual_prompt="close-up of a face",
+    concepts: list[str] | None = None,
+    visual_focus: str | None = None,
+) -> SceneConcept:
+    return SceneConcept(
         emotion=emotion,
-        duration_seconds=5.0,
+        concepts=concepts if concepts is not None else ["child", "window", "rain"],
     )
 
 
 def test_build_returns_string() -> None:
     builder = SearchQueryBuilder()
-    result = builder.build(_make_scene())
+    result = builder.build(_make_concept())
     assert isinstance(result, str)
 
 
 def test_build_is_not_empty() -> None:
     builder = SearchQueryBuilder()
-    result = builder.build(_make_scene())
+    result = builder.build(_make_concept())
     assert result.strip() != ""
 
 
 def test_output_is_deterministic() -> None:
     builder = SearchQueryBuilder()
-    scene = _make_scene("I waited by the door every evening.", Emotion.LONGING)
-    assert builder.build(scene) == builder.build(scene)
+    concept = _make_concept(Emotion.LONGING, ["road", "horizon"])
+    assert builder.build(concept) == builder.build(concept)
 
 
-def test_different_scenes_produce_different_queries() -> None:
+def test_different_emotions_produce_different_queries() -> None:
     builder = SearchQueryBuilder()
-    scene_a = _make_scene("She planted a seed in the rain.", Emotion.HOPE)
-    scene_b = _make_scene("He sat alone in a dark room.", Emotion.GRIEF)
-    assert builder.build(scene_a) != builder.build(scene_b)
+    concept_hope = _make_concept(Emotion.HOPE, ["field", "light"])
+    concept_grief = _make_concept(Emotion.GRIEF, ["field", "light"])
+    assert builder.build(concept_hope) != builder.build(concept_grief)
 
 
-def test_emotion_influences_query() -> None:
+def test_different_concepts_produce_different_queries() -> None:
     builder = SearchQueryBuilder()
-    scene_hope = _make_scene("A child runs through a field.", Emotion.HOPE)
-    scene_grief = _make_scene("A child runs through a field.", Emotion.GRIEF)
-    assert builder.build(scene_hope) != builder.build(scene_grief)
+    c1 = _make_concept(Emotion.NOSTALGIA, ["window", "rain"])
+    c2 = _make_concept(Emotion.NOSTALGIA, ["forest", "river"])
+    assert builder.build(c1) != builder.build(c2)
 
 
 def test_emotion_word_appears_in_query() -> None:
     builder = SearchQueryBuilder()
-    result = builder.build(_make_scene("Hands reach for the light.", Emotion.HOPE))
+    result = builder.build(_make_concept(Emotion.HOPE, ["seed", "soil"]))
     assert "hopeful" in result
 
 
-def test_first_person_narration_adds_person() -> None:
+def test_concepts_appear_in_query() -> None:
     builder = SearchQueryBuilder()
-    result = builder.build(_make_scene("I looked out at the empty street.", Emotion.LONELINESS))
-    assert "person" in result
+    result = builder.build(_make_concept(Emotion.GRIEF, ["candle", "dark"]))
+    assert "candle" in result
+    assert "dark" in result
 
 
-def test_third_person_narration_omits_person() -> None:
+def test_cinematic_terms_appear_in_query() -> None:
     builder = SearchQueryBuilder()
-    result = builder.build(_make_scene("The old man sat under a tree.", Emotion.NOSTALGIA))
-    assert "person" not in result
+    result = builder.build(_make_concept(Emotion.NOSTALGIA, ["table"]))
+    cinematic = get_cinematic_terms(Emotion.NOSTALGIA)
+    assert any(term in result for term in cinematic)
 
 
-def test_empty_narration_returns_emotion_word_and_cinematic_terms() -> None:
+def test_visual_focus_appears_in_query() -> None:
     builder = SearchQueryBuilder()
-    result = builder.build(_make_scene(narration="", emotion=Emotion.WONDER))
-    assert "breathtaking" in result
-    assert len(result.split()) > 1
-
-
-def test_query_contains_no_stop_words() -> None:
-    stop_words = {"a", "an", "the", "and", "or", "for", "in", "of", "to", "that"}
-    builder = SearchQueryBuilder()
-    result = builder.build(_make_scene("I kept waiting for a message that never came.", Emotion.LONELINESS))
-    query_words = set(result.lower().split())
-    assert query_words.isdisjoint(stop_words)
-
-
-def test_query_length_is_bounded() -> None:
-    builder = SearchQueryBuilder()
-    scene = _make_scene(
-        "She walked slowly through the long empty corridor at midnight thinking of home.",
-        Emotion.MELANCHOLY,
+    concept = SceneConcept(
+        emotion=Emotion.VULNERABILITY,
+        concepts=["hands"],
+        visual_focus="close-up",
     )
-    result = builder.build(scene)
-    assert len(result.split()) <= 10
+    result = builder.build(concept)
+    assert "close-up" in result
+
+
+def test_no_visual_focus_omits_it() -> None:
+    builder = SearchQueryBuilder()
+    concept = SceneConcept(emotion=Emotion.HOPE, concepts=["sunrise"])
+    result = builder.build(concept)
+    assert "close-up" not in result
+    assert "wide" not in result
+
+
+def test_empty_concepts_still_produces_query() -> None:
+    builder = SearchQueryBuilder()
+    result = builder.build(SceneConcept(emotion=Emotion.WONDER, concepts=[]))
+    assert "breathtaking" in result
+
+
+# --- Narration exclusion ---
+
+def test_narration_words_do_not_appear() -> None:
+    """SceneConcept carries no narration — narration words cannot leak into queries."""
+    builder = SearchQueryBuilder()
+    spanish_narration_words = ["hubo", "aprendiste", "alguien", "guardarlo", "tragarlo"]
+    concept = _make_concept(Emotion.GRIEF, ["rain", "candle"])
+    result = builder.build(concept)
+    for word in spanish_narration_words:
+        assert word not in result
+
+
+def test_query_contains_only_semantic_visual_concepts() -> None:
+    builder = SearchQueryBuilder()
+    concept = _make_concept(Emotion.LONELINESS, ["empty street", "fog"])
+    result = builder.build(concept)
+    # Must contain concept terms and emotion word, never narration fragments
+    assert "empty street" in result or "fog" in result
+    assert "lonely" in result

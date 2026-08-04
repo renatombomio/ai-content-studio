@@ -12,6 +12,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from ai_content_studio.assets.concept_extractor import SceneConceptExtractor
 from ai_content_studio.assets.interface import AssetProvider
 from ai_content_studio.assets.query_builder import SearchQueryBuilder
 from ai_content_studio.assets.ranking import AssetRanker
@@ -177,6 +178,7 @@ def brain(mock_llm: MagicMock) -> BrainService:
 def asset_service(mock_asset_provider: MagicMock) -> AssetService:
     return AssetService(
         query_builder=SearchQueryBuilder(),
+        concept_extractor=SceneConceptExtractor(),
         providers=[mock_asset_provider],
         ranker=AssetRanker(),
     )

@@ -10,6 +10,7 @@ from pathlib import Path
 
 import httpx
 
+from ai_content_studio.assets.concept_extractor import SceneConceptExtractor
 from ai_content_studio.assets.interface import AssetProvider
 from ai_content_studio.assets.providers.freepik import FreepikProvider
 from ai_content_studio.assets.providers.pexels import PexelsProvider
@@ -50,12 +51,15 @@ def main() -> None:
     print(f"Providers: {[type(p).__name__ for p in providers]}\n")
 
     story = Story.model_validate(json.loads(_STORY_PATH.read_text()))
-    service = AssetService(SearchQueryBuilder(), providers, AssetRanker())
+    extractor = SceneConceptExtractor()
+    query_builder = SearchQueryBuilder()
+    service = AssetService(query_builder, extractor, providers, AssetRanker())
 
     _OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
     for scene in sorted(story.scenes, key=lambda s: s.order):
-        query = SearchQueryBuilder().build(scene)
+        concept = extractor.extract(scene)
+        query = query_builder.build(concept)
         print(f"Scene {scene.order:02d} | emotion={scene.emotion.value} | query='{query}'")
 
         try:

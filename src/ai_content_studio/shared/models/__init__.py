@@ -6,6 +6,7 @@ from ai_content_studio.shared.models.editorial import ContentType, EditorialPill
 from ai_content_studio.shared.models.emotion import Emotion
 from ai_content_studio.shared.models.publication import Publication, PublicationStatus
 from ai_content_studio.shared.models.scene import Scene
+from ai_content_studio.shared.models.scene_concept import SceneConcept
 from ai_content_studio.shared.models.story import Story
 from ai_content_studio.shared.models.timeline import (
     SubtitleCue,
@@ -15,4 +16,4 @@ from ai_content_studio.shared.models.timeline import (
     VoiceTrack,
 )
 
-__all__ = ["Asset", "ContentType", "CreativeBrief", "EditorialPillar", "Emotion", "Publication", "PublicationStatus", "Scene", "Story", "SubtitleCue", "Timeline", "TimelineAsset", "TimelineScene", "VoiceTrack"]
+__all__ = ["Asset", "ContentType", "CreativeBrief", "EditorialPillar", "Emotion", "Publication", "PublicationStatus", "Scene", "SceneConcept", "Story", "SubtitleCue", "Timeline", "TimelineAsset", "TimelineScene", "VoiceTrack"]

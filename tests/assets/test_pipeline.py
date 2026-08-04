@@ -2,6 +2,7 @@
 
 import pytest
 
+from ai_content_studio.assets.concept_extractor import SceneConceptExtractor
 from ai_content_studio.assets.interface import AssetProvider
 from ai_content_studio.assets.query_builder import SearchQueryBuilder
 from ai_content_studio.assets.ranking import AssetRanker
@@ -96,6 +97,7 @@ def _make_pipeline(
     pixabay = FakePixabayProvider()
     service = AssetService(
         query_builder=SearchQueryBuilder(),
+        concept_extractor=SceneConceptExtractor(),
         providers=providers if providers is not None else [freepik, pexels, pixabay],
         ranker=AssetRanker(),
     )
@@ -152,6 +154,7 @@ def test_pipeline_removes_duplicates() -> None:
     pixabay = FakePixabayProvider(assets=[duplicate])  # same source+id as pexels
     service = AssetService(
         query_builder=SearchQueryBuilder(),
+        concept_extractor=SceneConceptExtractor(),
         providers=[freepik, pexels, pixabay],
         ranker=AssetRanker(),
     )
@@ -166,6 +169,7 @@ def test_pipeline_same_id_different_source_kept() -> None:
     pixabay = FakePixabayProvider(assets=[])
     service = AssetService(
         query_builder=SearchQueryBuilder(),
+        concept_extractor=SceneConceptExtractor(),
         providers=[freepik, pexels, pixabay],
         ranker=AssetRanker(),
     )
@@ -188,6 +192,7 @@ def test_pipeline_returns_assets_in_ranked_order() -> None:
     pixabay = FakePixabayProvider(assets=[portrait_video])
     service = AssetService(
         query_builder=SearchQueryBuilder(),
+        concept_extractor=SceneConceptExtractor(),
         providers=[freepik, pexels, pixabay],
         ranker=AssetRanker(),
     )
@@ -207,6 +212,7 @@ def test_pipeline_one_provider_failing_continues() -> None:
     freepik = FakeFreepikProvider(assets=[_make_asset("freepik", "1")])
     service = AssetService(
         query_builder=SearchQueryBuilder(),
+        concept_extractor=SceneConceptExtractor(),
         providers=[FailingProvider(), freepik, FailingProvider()],
         ranker=AssetRanker(),
     )
@@ -218,6 +224,7 @@ def test_pipeline_two_providers_failing_still_works() -> None:
     pexels = FakePexelsProvider(assets=[_make_asset("pexels", "1")])
     service = AssetService(
         query_builder=SearchQueryBuilder(),
+        concept_extractor=SceneConceptExtractor(),
         providers=[FailingProvider(), pexels, FailingProvider()],
         ranker=AssetRanker(),
     )
@@ -228,6 +235,7 @@ def test_pipeline_two_providers_failing_still_works() -> None:
 def test_pipeline_all_providers_failing_raises_asset_error() -> None:
     service = AssetService(
         query_builder=SearchQueryBuilder(),
+        concept_extractor=SceneConceptExtractor(),
         providers=[FailingProvider(), FailingProvider(), FailingProvider()],
         ranker=AssetRanker(),
     )
