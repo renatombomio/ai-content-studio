@@ -35,6 +35,7 @@ from ai_content_studio.brands.brand_context import BrandContext
 from ai_content_studio.shared.models import Scene
 from ai_content_studio.shared.models.editorial import EditorialPillar
 from ai_content_studio.shared.models.emotion import Emotion
+from ai_content_studio.video.question_renderer import QuestionRenderer
 from ai_content_studio.video.reflection_renderer import RENDERER_VERSION, ReflectionRenderer
 
 _OUTPUT_ROOT = Path(__file__).parents[1] / "output" / "batch"
@@ -119,6 +120,7 @@ class _Services:
     extractor: SceneConceptExtractor
     query_builder: SearchQueryBuilder
     renderer: ReflectionRenderer
+    question_renderer: QuestionRenderer
 
 
 def _next_batch_number() -> int:
@@ -240,7 +242,8 @@ def _generate_question(
 
     print(f"            \"{question.question_text}\"")
 
-    (question_dir / "question.json").write_text(
+    question_json = question_dir / "question.json"
+    question_json.write_text(
         json.dumps({
             "pillar": pillar.value,
             "question_text": question.question_text,
@@ -251,6 +254,9 @@ def _generate_question(
         }, ensure_ascii=False, indent=2),
         encoding="utf-8",
     )
+
+    svc.question_renderer.render(question_json=question_json, output_dir=question_dir)
+    print(f"            cover.png + question.png rendered")
     return True
 
 
@@ -308,6 +314,7 @@ def main() -> None:
         extractor=extractor,
         query_builder=query_builder,
         renderer=ReflectionRenderer(),
+        question_renderer=QuestionRenderer(),
     )
 
     print(f"Cocoa Talk — Batch {batch_number:03d}")
