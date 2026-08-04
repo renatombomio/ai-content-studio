@@ -69,10 +69,11 @@ def test_third_person_narration_omits_person() -> None:
     assert "person" not in result
 
 
-def test_empty_narration_returns_emotion_word() -> None:
+def test_empty_narration_returns_emotion_word_and_cinematic_terms() -> None:
     builder = SearchQueryBuilder()
     result = builder.build(_make_scene(narration="", emotion=Emotion.WONDER))
-    assert result == "breathtaking"
+    assert "breathtaking" in result
+    assert len(result.split()) > 1
 
 
 def test_query_contains_no_stop_words() -> None:
@@ -90,4 +91,4 @@ def test_query_length_is_bounded() -> None:
         Emotion.MELANCHOLY,
     )
     result = builder.build(scene)
-    assert len(result.split()) <= 5
+    assert len(result.split()) <= 10

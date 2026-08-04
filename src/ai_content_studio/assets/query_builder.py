@@ -2,6 +2,7 @@
 
 import re
 
+from ai_content_studio.assets.visual_language import get_cinematic_terms
 from ai_content_studio.shared.models import Scene
 from ai_content_studio.shared.models.emotion import Emotion
 
@@ -50,7 +51,7 @@ class SearchQueryBuilder:
     """Transforms a Scene into a concise visual search query for asset providers."""
 
     def build(self, scene: Scene) -> str:
-        """Return a visual search query derived from scene narration and emotion."""
+        """Return a cinematic visual search query derived from scene narration and emotion."""
         parts: list[str] = []
 
         emotion_word = _EMOTION_VISUAL.get(scene.emotion)
@@ -61,6 +62,7 @@ class SearchQueryBuilder:
             parts.append("person")
 
         parts.extend(_extract_keywords(scene.narration)[:_MAX_KEYWORDS])
+        parts.extend(get_cinematic_terms(scene.emotion))
 
         return " ".join(parts)
 
