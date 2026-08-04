@@ -84,17 +84,19 @@ def main() -> None:
     print(f"Saved:        {STORY_PATH}\n")
 
     # ── Assets ───────────────────────────────────────────────────────────────
+    extractor = SceneConceptExtractor()
     query_builder = SearchQueryBuilder()
     asset_service = AssetService(
         query_builder=query_builder,
-        concept_extractor=SceneConceptExtractor(),
+        concept_extractor=extractor,
         providers=[PexelsProvider()],
         ranker=AssetRanker(),
     )
 
     assets_by_scene: dict[str, list[Asset]] = {}
     for scene in story.scenes:
-        query = query_builder.build(scene)
+        concept = extractor.extract(scene)
+        query = query_builder.build(concept)
         print(f"Scene {scene.order:>2} query:  {query!r}")
 
         try:
