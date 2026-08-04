@@ -2,6 +2,7 @@
 
 import re
 
+from ai_content_studio.shared.models.emotion import Emotion
 from ai_content_studio.shared.models.scene import Scene
 from ai_content_studio.shared.models.scene_concept import SceneConcept
 
@@ -56,12 +57,14 @@ class SceneConceptExtractor:
 
     def extract(self, scene: Scene) -> SceneConcept:
         """Return a SceneConcept derived from scene.visual_prompt and scene.emotion."""
-        concepts = _extract_concepts(scene.visual_prompt)
-        visual_focus = _detect_focus(scene.visual_prompt)
+        return self.extract_from_prompt(scene.visual_prompt, scene.emotion)
+
+    def extract_from_prompt(self, visual_prompt: str, emotion: Emotion) -> SceneConcept:
+        """Return a SceneConcept derived from a visual prompt string and emotion."""
         return SceneConcept(
-            emotion=scene.emotion,
-            concepts=concepts,
-            visual_focus=visual_focus,
+            emotion=emotion,
+            concepts=_extract_concepts(visual_prompt),
+            visual_focus=_detect_focus(visual_prompt),
         )
 
 
