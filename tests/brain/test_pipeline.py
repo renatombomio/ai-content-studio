@@ -6,6 +6,7 @@ from ai_content_studio.brain.parser import StoryParser
 from ai_content_studio.brain.prompt_builder import PromptBuilder
 from ai_content_studio.brain.providers import LLMProvider
 from ai_content_studio.shared.models import CreativeBrief, Scene, Story
+from ai_content_studio.shared.models.editorial import ContentType, EditorialPillar
 from ai_content_studio.shared.models.emotion import Emotion
 
 _FAKE_STORY = {
@@ -46,6 +47,8 @@ def _make_brief(idea: str = "cocoa origin") -> CreativeBrief:
         theme="origin and legacy",
         narrative_arc="four-phase arc",
         target_duration_seconds=60,
+        pillar=EditorialPillar.SHADOW_WORK,
+        content_type=ContentType.VIDEO,
     )
 
 

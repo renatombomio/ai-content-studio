@@ -18,6 +18,9 @@ class PromptBuilder:
         """Return the full prompt: Cocoa Talk identity + story instructions + creative brief."""
         brief_section = (
             f"{_BRIEF_HEADER}"
+            f"**Pillar:** {brief.pillar.value}\n"
+            f"**Content Type:** {brief.content_type.value}\n"
+            f"**Language:** {brief.language}\n"
             f"**Idea:** {brief.idea}\n"
             f"**Primary Emotion:** {brief.primary_emotion.value}\n"
             f"**Theme:** {brief.theme}\n"

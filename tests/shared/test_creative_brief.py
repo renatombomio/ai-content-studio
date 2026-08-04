@@ -1,6 +1,7 @@
 """Tests for the CreativeBrief domain model."""
 
 from ai_content_studio.shared.models import CreativeBrief, Emotion
+from ai_content_studio.shared.models.editorial import ContentType, EditorialPillar
 
 
 def _make_brief(**kwargs: object) -> CreativeBrief:
@@ -10,6 +11,8 @@ def _make_brief(**kwargs: object) -> CreativeBrief:
         "theme": "Legacy and sacrifice",
         "narrative_arc": "recognition → grief → acceptance → wonder",
         "target_duration_seconds": 50,
+        "pillar": EditorialPillar.INTRAPERSONAL,
+        "content_type": ContentType.VIDEO,
     }
     defaults.update(kwargs)
     return CreativeBrief(**defaults)  # type: ignore[arg-type]

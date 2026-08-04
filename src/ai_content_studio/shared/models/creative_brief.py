@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel
 
+from ai_content_studio.shared.models.editorial import ContentType, EditorialPillar
 from ai_content_studio.shared.models.emotion import Emotion
 
 
@@ -13,3 +14,6 @@ class CreativeBrief(BaseModel):
     theme: str
     narrative_arc: str
     target_duration_seconds: int
+    pillar: EditorialPillar
+    content_type: ContentType
+    language: str = "es"

@@ -4,6 +4,7 @@ from ai_content_studio.brain.prompt_builder import PromptBuilder
 from ai_content_studio.brain.prompts import load_story_prompt
 from ai_content_studio.brands.brand_context import BrandContext
 from ai_content_studio.shared.models import CreativeBrief
+from ai_content_studio.shared.models.editorial import ContentType, EditorialPillar
 from ai_content_studio.shared.models.emotion import Emotion
 
 _STUB_BRAND = BrandContext(
@@ -19,6 +20,8 @@ def _make_brief(idea: str = "cocoa origin") -> CreativeBrief:
         theme="origin and legacy",
         narrative_arc="four-phase arc",
         target_duration_seconds=60,
+        pillar=EditorialPillar.SHADOW_WORK,
+        content_type=ContentType.VIDEO,
     )
 
 
@@ -106,3 +109,24 @@ def test_default_builder_uses_brand_context() -> None:
     builder = PromptBuilder()
     result = builder.build_story_prompt(_make_brief())
     assert "Cocoa Talk" in result
+
+
+def test_prompt_contains_editorial_pillar() -> None:
+    builder = _make_builder()
+    brief = _make_brief()
+    result = builder.build_story_prompt(brief)
+    assert brief.pillar.value in result
+
+
+def test_prompt_contains_content_type() -> None:
+    builder = _make_builder()
+    brief = _make_brief()
+    result = builder.build_story_prompt(brief)
+    assert brief.content_type.value in result
+
+
+def test_prompt_contains_language() -> None:
+    builder = _make_builder()
+    brief = _make_brief()
+    result = builder.build_story_prompt(brief)
+    assert brief.language in result
