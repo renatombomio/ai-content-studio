@@ -2,6 +2,7 @@
 
 from ai_content_studio.brain.prompts import load_story_prompt
 from ai_content_studio.brands.brand_context import BrandContext
+from ai_content_studio.brands.content_profiles import get_content_profile
 from ai_content_studio.brands.editorial_profiles import get_profile
 from ai_content_studio.shared.models import CreativeBrief
 
@@ -16,8 +17,9 @@ class PromptBuilder:
         self._story_prompt = load_story_prompt()
 
     def build_story_prompt(self, brief: CreativeBrief) -> str:
-        """Return the full prompt: brand identity + editorial profile + story instructions + brief."""
-        profile_section = get_profile(brief.pillar).to_prompt_section()
+        """Return the full prompt: brand → editorial → content → brief → story template."""
+        editorial_section = get_profile(brief.pillar).to_prompt_section()
+        content_section = get_content_profile(brief.content_type).to_prompt_section()
         brief_section = (
             f"{_BRIEF_HEADER}"
             f"**Pillar:** {brief.pillar.value}\n"
@@ -31,7 +33,8 @@ class PromptBuilder:
         )
         return (
             f"{self._brand_context.system_prompt}\n\n---\n\n"
-            f"{profile_section}\n\n---\n\n"
+            f"{editorial_section}\n\n---\n\n"
+            f"{content_section}\n\n---\n\n"
             f"{self._story_prompt}\n\n---\n\n"
             f"{brief_section}"
         )

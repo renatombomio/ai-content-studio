@@ -3,6 +3,7 @@
 from ai_content_studio.brain.prompt_builder import PromptBuilder
 from ai_content_studio.brain.prompts import load_story_prompt
 from ai_content_studio.brands.brand_context import BrandContext
+from ai_content_studio.brands.content_profiles import get_content_profile
 from ai_content_studio.brands.editorial_profiles import get_profile
 from ai_content_studio.shared.models import CreativeBrief
 from ai_content_studio.shared.models.editorial import ContentType, EditorialPillar
@@ -182,3 +183,52 @@ def test_prompt_order_profile_before_story() -> None:
     profile_pos = result.index(profile.to_prompt_section())
     story_pos = result.index(load_story_prompt())
     assert profile_pos < story_pos
+
+
+def test_prompt_contains_content_profile_section() -> None:
+    builder = _make_builder()
+    brief = _make_brief()
+    result = builder.build_story_prompt(brief)
+    content_profile = get_content_profile(brief.content_type)
+    assert content_profile.to_prompt_section() in result
+
+
+def test_prompt_content_profile_changes_with_content_type() -> None:
+    builder = _make_builder()
+    brief_video = CreativeBrief(
+        idea="test",
+        primary_emotion=Emotion.NOSTALGIA,
+        theme="t",
+        narrative_arc="arc",
+        target_duration_seconds=60,
+        pillar=EditorialPillar.SHADOW_WORK,
+        content_type=ContentType.VIDEO,
+    )
+    brief_carousel = CreativeBrief(
+        idea="test",
+        primary_emotion=Emotion.NOSTALGIA,
+        theme="t",
+        narrative_arc="arc",
+        target_duration_seconds=60,
+        pillar=EditorialPillar.SHADOW_WORK,
+        content_type=ContentType.CAROUSEL,
+    )
+    assert builder.build_story_prompt(brief_video) != builder.build_story_prompt(brief_carousel)
+
+
+def test_prompt_order_editorial_before_content() -> None:
+    builder = _make_builder()
+    brief = _make_brief()
+    result = builder.build_story_prompt(brief)
+    editorial_pos = result.index(get_profile(brief.pillar).to_prompt_section())
+    content_pos = result.index(get_content_profile(brief.content_type).to_prompt_section())
+    assert editorial_pos < content_pos
+
+
+def test_prompt_order_content_before_story() -> None:
+    builder = _make_builder()
+    brief = _make_brief()
+    result = builder.build_story_prompt(brief)
+    content_pos = result.index(get_content_profile(brief.content_type).to_prompt_section())
+    story_pos = result.index(load_story_prompt())
+    assert content_pos < story_pos
