@@ -12,6 +12,7 @@ from ai_content_studio.shared.models.reflection import Reflection
 _VALID_JSON = json.dumps({
     "title": "El primer silencio",
     "reflection_text": "Hubo un día en que decidiste que tu dolor no merecía espacio.",
+    "caption": "A veces el primer silencio es el que más pesa.",
     "visual_prompt": "Close-up of a child's hand letting go of another hand. Warm afternoon light. Shallow depth of field.",
     "hashtags": ["#shadowwork", "#sanacioninterior"],
 })
@@ -47,6 +48,24 @@ def test_parse_hashtags_preserved() -> None:
     parser = ReflectionParser()
     result = parser.parse(_VALID_JSON)
     assert "#shadowwork" in result.hashtags
+
+
+def test_parse_caption_preserved() -> None:
+    parser = ReflectionParser()
+    result = parser.parse(_VALID_JSON)
+    assert "silencio" in result.caption
+
+
+def test_parse_caption_defaults_to_empty() -> None:
+    parser = ReflectionParser()
+    no_caption = json.dumps({
+        "title": "test",
+        "reflection_text": "Texto.",
+        "visual_prompt": "A scene.",
+        "hashtags": [],
+    })
+    result = parser.parse(no_caption)
+    assert result.caption == ""
 
 
 def test_parse_sets_pillar() -> None:

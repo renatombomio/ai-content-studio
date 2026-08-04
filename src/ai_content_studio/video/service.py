@@ -20,7 +20,7 @@ class RenderService:
     def __init__(
         self,
         timeline_builder: TimelineBuilder,
-        voice_provider: VoiceProvider,
+        voice_provider: VoiceProvider | None,
         subtitle_generator: SubtitleGenerator,
         renderer: FFmpegRenderer,
     ) -> None:
@@ -35,20 +35,22 @@ class RenderService:
         assets_by_scene: dict[str, list[Asset]],
         output_path: Path,
     ) -> Path:
-        """Build Timeline, synthesize audio, generate subtitles, and render the MP4."""
+        """Build Timeline, synthesize audio (if provider set), generate subtitles, and render."""
         timeline = self._timeline_builder.build(story, assets_by_scene)
 
-        narration = "\n".join(ts.scene.narration for ts in timeline.scenes)
-        audio_bytes = self._voice_provider.generate(narration)
-        voice_track = VoiceTrack(
-            audio=audio_bytes,
-            sample_rate=_parse_wav_sample_rate(audio_bytes),
-            duration=_parse_wav_duration(audio_bytes),
-        )
+        updates: dict[str, object] = {}
 
-        subtitles = self._subtitle_generator.generate(timeline)
+        if self._voice_provider is not None:
+            narration = "\n".join(ts.scene.narration for ts in timeline.scenes)
+            audio_bytes = self._voice_provider.generate(narration)
+            updates["voice_track"] = VoiceTrack(
+                audio=audio_bytes,
+                sample_rate=_parse_wav_sample_rate(audio_bytes),
+                duration=_parse_wav_duration(audio_bytes),
+            )
 
-        timeline = timeline.model_copy(update={"voice_track": voice_track, "subtitles": subtitles})
+        updates["subtitles"] = self._subtitle_generator.generate(timeline)
+        timeline = timeline.model_copy(update=updates)
 
         return self._renderer.render(timeline, output_path)
 

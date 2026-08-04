@@ -12,6 +12,7 @@ class Reflection(BaseModel):
 
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
     reflection_text: str
+    caption: str = ""
     visual_prompt: str
     title: str
     hashtags: list[str] = []

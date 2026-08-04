@@ -7,4 +7,6 @@ from ai_content_studio.brain.providers import LLMProvider
 from ai_content_studio.brain.service import BrainService
 from ai_content_studio.brain.story_director import StoryDirector
 
-__all__ = ["Brain", "BrainService", "LLMProvider", "PromptBuilder", "StoryDirector", "StoryParser"]
+BRAIN_VERSION = "1.0.0"
+
+__all__ = ["BRAIN_VERSION", "Brain", "BrainService", "LLMProvider", "PromptBuilder", "StoryDirector", "StoryParser"]
