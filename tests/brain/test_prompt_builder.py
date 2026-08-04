@@ -3,6 +3,7 @@
 from ai_content_studio.brain.prompt_builder import PromptBuilder
 from ai_content_studio.brain.prompts import load_story_prompt
 from ai_content_studio.brands.brand_context import BrandContext
+from ai_content_studio.brands.editorial_profiles import get_profile
 from ai_content_studio.shared.models import CreativeBrief
 from ai_content_studio.shared.models.editorial import ContentType, EditorialPillar
 from ai_content_studio.shared.models.emotion import Emotion
@@ -130,3 +131,54 @@ def test_prompt_contains_language() -> None:
     brief = _make_brief()
     result = builder.build_story_prompt(brief)
     assert brief.language in result
+
+
+def test_prompt_contains_editorial_profile_section() -> None:
+    builder = _make_builder()
+    brief = _make_brief()
+    result = builder.build_story_prompt(brief)
+    profile = get_profile(brief.pillar)
+    assert profile.to_prompt_section() in result
+
+
+def test_prompt_profile_changes_with_pillar() -> None:
+    builder = _make_builder()
+    brief_shadow = CreativeBrief(
+        idea="test",
+        primary_emotion=Emotion.NOSTALGIA,
+        theme="t",
+        narrative_arc="arc",
+        target_duration_seconds=60,
+        pillar=EditorialPillar.SHADOW_WORK,
+        content_type=ContentType.VIDEO,
+    )
+    brief_mental = CreativeBrief(
+        idea="test",
+        primary_emotion=Emotion.NOSTALGIA,
+        theme="t",
+        narrative_arc="arc",
+        target_duration_seconds=60,
+        pillar=EditorialPillar.MENTAL_HEALTH,
+        content_type=ContentType.VIDEO,
+    )
+    assert builder.build_story_prompt(brief_shadow) != builder.build_story_prompt(brief_mental)
+
+
+def test_prompt_order_brand_before_profile() -> None:
+    builder = _make_builder()
+    brief = _make_brief()
+    result = builder.build_story_prompt(brief)
+    profile = get_profile(brief.pillar)
+    brand_pos = result.index(_STUB_BRAND.brand_document)
+    profile_pos = result.index(profile.to_prompt_section())
+    assert brand_pos < profile_pos
+
+
+def test_prompt_order_profile_before_story() -> None:
+    builder = _make_builder()
+    brief = _make_brief()
+    result = builder.build_story_prompt(brief)
+    profile = get_profile(brief.pillar)
+    profile_pos = result.index(profile.to_prompt_section())
+    story_pos = result.index(load_story_prompt())
+    assert profile_pos < story_pos
