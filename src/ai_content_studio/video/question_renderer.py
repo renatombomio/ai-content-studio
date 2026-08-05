@@ -207,14 +207,29 @@ def _select_cover(
     covers_dir: Path,
     history: dict[str, Any],
 ) -> str:
-    """Return the stem of the least-used cover in the pillar pool."""
+    """Return the stem of the best matching cover using three-tier selection.
+
+    Tier 1 — never used (count == 0): always preferred among matching covers.
+    Tier 2 — least used: applied only when every matching cover has been used.
+    Tier 3 — random tie-break: only between covers with identical usage counts.
+    """
     pool = _COVER_MAP.get(pillar, _ALL_COVERS)
     available = [stem for stem in pool if _resolve_cover(stem, covers_dir) is not None]
     if not available:
         available = [stem for stem in _ALL_COVERS if _resolve_cover(stem, covers_dir) is not None]
+
     usage: dict[str, Any] = history["usage"]
+
+    # Tier 1: prefer covers that have never been used
+    never_used = [stem for stem in available if usage.get(stem, 0) == 0]
+    if never_used:
+        return random.choice(never_used)
+
+    # Tier 2: least-used among covers that have all been used at least once
     min_count = min(usage.get(stem, 0) for stem in available)
     candidates = [stem for stem in available if usage.get(stem, 0) == min_count]
+
+    # Tier 3: random tie-break
     return random.choice(candidates)
 
 

@@ -1,0 +1,22 @@
+{
+  "usage": {
+    "01_holding_mug": 1,
+    "02_thinking": 1,
+    "03_writing": 1,
+    "04_listening": 2,
+    "05_pointing": 1,
+    "06_tired": 1,
+    "07_reflecting": 1,
+    "08_applauding": 0
+  },
+  "episodes": {
+    "002_question_001": "05_pointing",
+    "002_question_002": "01_holding_mug",
+    "002_question_003": "06_tired",
+    "002_question_004": "07_reflecting",
+    "002_question_005": "02_thinking",
+    "002_question_006": "04_listening",
+    "002_question_007": "04_listening",
+    "002_question_008": "03_writing"
+  }
+}

@@ -144,16 +144,42 @@ def test_save_and_reload_roundtrip(tmp_path: Path) -> None:
     assert loaded["episodes"]["batch_001_question_001"] == "07_reflecting"
 
 
-# --- cover selection ---
+# --- cover selection — tier 1: never-used ---
 
-def test_select_cover_picks_from_pillar_pool(tmp_path: Path) -> None:
+def test_select_cover_prefers_never_used_over_least_used(tmp_path: Path) -> None:
     covers = _full_covers_dir(tmp_path)
     history = _empty_history()
+    # 05_pointing and 06_tired used; 01_holding_mug never used
+    history["usage"]["05_pointing"] = 1
+    history["usage"]["06_tired"] = 1
+    history["usage"]["01_holding_mug"] = 0
     result = _select_cover(EditorialPillar.SHADOW_WORK, covers, history)
-    assert result in {"05_pointing", "01_holding_mug", "06_tired"}
+    assert result == "01_holding_mug"
 
 
-def test_select_cover_picks_least_used(tmp_path: Path) -> None:
+def test_select_cover_never_used_beats_any_used_count(tmp_path: Path) -> None:
+    covers = _full_covers_dir(tmp_path)
+    history = _empty_history()
+    # 05_pointing used only once, but 06_tired never used — tier 1 wins
+    history["usage"]["05_pointing"] = 1
+    history["usage"]["01_holding_mug"] = 99
+    history["usage"]["06_tired"] = 0
+    result = _select_cover(EditorialPillar.SHADOW_WORK, covers, history)
+    assert result == "06_tired"
+
+
+def test_select_cover_tier1_random_among_multiple_never_used(tmp_path: Path) -> None:
+    covers = _full_covers_dir(tmp_path)
+    history = _empty_history()
+    # all pool covers at 0 — any is valid, randomness expected
+    results = {_select_cover(EditorialPillar.SHADOW_WORK, covers, history) for _ in range(40)}
+    assert results <= {"05_pointing", "01_holding_mug", "06_tired"}
+    assert len(results) > 1
+
+
+# --- cover selection — tier 2: least used (all covers used at least once) ---
+
+def test_select_cover_least_used_when_all_used(tmp_path: Path) -> None:
     covers = _full_covers_dir(tmp_path)
     history = _empty_history()
     history["usage"]["05_pointing"] = 5
@@ -163,13 +189,38 @@ def test_select_cover_picks_least_used(tmp_path: Path) -> None:
     assert result == "06_tired"
 
 
-def test_select_cover_breaks_ties_randomly(tmp_path: Path) -> None:
+def test_select_cover_least_used_single_winner(tmp_path: Path) -> None:
     covers = _full_covers_dir(tmp_path)
     history = _empty_history()
-    # all at 0 — any pool member is valid
+    history["usage"]["05_pointing"] = 3
+    history["usage"]["01_holding_mug"] = 7
+    history["usage"]["06_tired"] = 3
+    # 06_tired and 05_pointing tied at 3; 01_holding_mug excluded
     results = {_select_cover(EditorialPillar.SHADOW_WORK, covers, history) for _ in range(30)}
+    assert "01_holding_mug" not in results
+    assert results <= {"05_pointing", "06_tired"}
+
+
+# --- cover selection — tier 3: random tie-break ---
+
+def test_select_cover_random_tiebreak_among_equal_used(tmp_path: Path) -> None:
+    covers = _full_covers_dir(tmp_path)
+    history = _empty_history()
+    history["usage"]["05_pointing"] = 2
+    history["usage"]["01_holding_mug"] = 2
+    history["usage"]["06_tired"] = 2
+    results = {_select_cover(EditorialPillar.SHADOW_WORK, covers, history) for _ in range(40)}
     assert results <= {"05_pointing", "01_holding_mug", "06_tired"}
-    assert len(results) > 1  # randomness confirmed
+    assert len(results) > 1
+
+
+# --- cover selection — general ---
+
+def test_select_cover_picks_from_pillar_pool(tmp_path: Path) -> None:
+    covers = _full_covers_dir(tmp_path)
+    history = _empty_history()
+    result = _select_cover(EditorialPillar.SHADOW_WORK, covers, history)
+    assert result in {"05_pointing", "01_holding_mug", "06_tired"}
 
 
 def test_select_cover_all_pillars_resolve(tmp_path: Path) -> None:

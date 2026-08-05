@@ -47,5 +47,8 @@ def test_root_is_absolute() -> None:
 
 
 def test_no_directories_created() -> None:
-    for p in [DATA, CACHE, ASSETS, PROJECTS, RENDERS, OUTPUT, TEMP]:
+    # DATA itself may exist (e.g. cover_history.json), but sub-dirs that the
+    # project hasn't written to yet must not be auto-created by paths.py.
+    auto_created_subdirs = [CACHE, ASSETS, PROJECTS, RENDERS, OUTPUT, TEMP]
+    for p in auto_created_subdirs:
         assert not p.exists(), f"{p} should not be created by paths.py"
